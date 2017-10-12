@@ -1,4 +1,6 @@
-#include <winsock2.h>
+#include<sys/socket.h>
+#include<sys/types.h>
+#include<netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include<iostream>
@@ -7,14 +9,16 @@
 #include<cstring>
 #include<vector>
 #include<map>
-#include<process.h>
-#include<Windows.h>
+#include<unistd.h>
+#include<signal.h>
+#include<sys/wait.h>
+#include<sys/stat.h>
 using namespace std;
-#pragma comment(lib , "ws2_32.lib")
+//获取请求文件名
 void getfilename(char a[],char filename[])
 {
-	int k = 1;
-	for (int i = 0; i < strlen(a); i++)
+	int k =6;
+	for (size_t i = 0; i < strlen(a); i++)
 	{
 		if (a[i] == '/')
 		{
@@ -24,7 +28,10 @@ void getfilename(char a[],char filename[])
 		}
 	}
 	filename[k] = '\0';
+	if(filename[strlen(filename)-1]=='/')
+		strcat(filename,"index.html");
 }
+//获取请求类型
 void get_type(char filename[], char type[])
 {
 	if (strstr(filename, ".html"))
@@ -46,12 +53,12 @@ void get_type(char filename[], char type[])
 						strcpy(type, "text/plain");
 	}
 }
+//响应
 void respond(int n,char filename[])
 {
 	ifstream cf(filename,std::ios::binary);
 	char a[1000000];
 	char type[1000];
-	int i = 0;
 	int chang;
 	cf.seekg(0, ios::end);
 	chang = cf.tellg();
@@ -61,53 +68,81 @@ void respond(int n,char filename[])
 	get_type(filename, type);
 	char b[1000] = "http/1.0 200 ok\r\nAccept-Ranges:bytes\r\nServer:cf web server\r\nContent-type:";
 	strcat(b, type);
+	
 	strcat(b, "\r\n\r\n");
-	send(n, b, strlen(b), 0);
+	write(n, b, strlen(b));
 	int slen = 0;
-	if (!strstr(filename, ".ico"))
-		slen=send(n,a,chang,0);
-	cout << "sizeof:" << chang << endl;
+	slen=send(n,a,chang,0);
+/*	cout << "sizeof:" << chang << endl;
 	cout <<"leng:"<< cf.tellg() << endl;
-	cout << "slen:" << slen << endl;
+	cout << "slen:" << slen << endl;*/
 }
+//错误处理
+void clienterror(int fd)
+{
+	char buf[1000]={"HTTP/1.0 404 NOT FOUND\r\n\r\n"};
+	write(fd,buf,strlen(buf));
+}
+//处理请求
 void handle_request(int n)
 {
 	char a[10000];
-	int l = recv(n, a, 10000, 0);
+	struct stat sbuf;
+	int l = read(n, a, 10000);
 	a[l] = '\0';
-	cout << a << endl;
+	cout << a << endl;//打印请求头
 	char filename[1000];
-	filename[0] = '.';
-	getfilename(a, filename);
-	
-	if (filename[strlen(filename) - 1] == '/')
+	strcat(filename,"./test");
+	getfilename(a, filename);//获取文件名
+	//cout<<filename<<endl;
+	if(stat(filename,&sbuf)<0)	
 	{
-		strcat(filename, "index.html");
+		clienterror(n);
+		return;
+		
 	}
-	cout << filename << endl;
-	if(!strstr(filename,"ico"))
-		respond(n,filename);
+	//cout << filename << endl;
+	respond(n,filename);//响应
 }
-int main(int argc, char **argv)
+//信号处理器
+void handler(int sign)
 {
-	WSADATA data;
-	sockaddr_in client, server;
-	WSAStartup(MAKEWORD(2, 2), &data);
+	//调用waitpid可以不用阻塞
+	while(waitpid(-1,0,WNOHANG)>0)
+	{
+		cout<<"子进程退出"<<endl;
+	}
+	return;
+}
+int main()
+{
+	struct sockaddr_in client, server;
 	int socketd = socket(AF_INET, SOCK_STREAM, 0);
 	server.sin_family = AF_INET;
 	server.sin_port = htons(8888);
-	server.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
+	server.sin_addr.s_addr =htonl(INADDR_ANY);
 	bind(socketd, (sockaddr*)&server, sizeof(server));
 	listen(socketd, 10);
-	int l = sizeof(client);
-	
+	socklen_t l = sizeof(client);
+	//注册信号处理器，捕获子进程退出信号
+	if(signal(SIGCHLD,handler)==SIG_ERR)
+	{
+		printf("signal() failed\n");
+		return -1;
+	}
 	while (1) {
 		int n = accept(socketd, (sockaddr*)&client, &l);
-		handle_request(n);
-		closesocket(n);
+		int p_id=fork();
+		if(p_id==0)
+		{
+			close(socketd);//因为创建子进程 socketd文件引用计数会加1，如果不关闭，最后就无法实现完全关闭，下面的n也是一样
+			handle_request(n);
+			close(n);
+			exit(0);
+		}
+		close(n);
 	}
-	closesocket(socketd);
-	WSACleanup();
+	close(socketd);
 }
 /*int main()
 {
