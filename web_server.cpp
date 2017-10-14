@@ -119,8 +119,8 @@ void handle_request(int n)
 	//cout << filename << endl;
 	respond(n,filename,sbuf.st_size);//响应
 }
-//信号处理器
-void handler(int sign)
+//信号处理器,多进程并发
+/*void handler(int sign)
 {
 	//调用waitpid可以不用阻塞
 	while(waitpid(-1,0,WNOHANG)>0)
@@ -128,6 +128,43 @@ void handler(int sign)
 		cout<<"子进程退出"<<endl;
 	}
 	return;
+}*/
+//I/O多路复用
+struct cf{
+	int maxfd;
+	int maxi;
+	int nready;
+	int clientfd[1024];
+	fd_set read_set;
+	fd_set ready_set;
+}pool;
+void init(int listenfd,struct cf *pool)
+{
+	pool->maxi=-1;
+	for(int i=0;i<1024;i++)
+		pool->clientfd[i]=-1;
+	pool->maxfd=listenfd;
+	FD_ZERO(&pool->read_set);
+	FD_SET(listenfd,&pool->read_set);
+	return;
+}
+void add_pool(int confd,struct cf *pool)
+{
+	int i;
+	pool->nready--;
+	for(i=0;i<1024;i++)
+	{
+		if(pool->clientfd[i]<0)
+		{
+			pool->clientfd[i]=confd;
+			FD_SET(confd,&pool->read_set);
+			if(pool->maxfd<confd)
+				pool->maxfd=confd;
+			if(pool->maxi<i)
+				pool->maxi=i;
+			break;
+		}
+	}
 }
 int main()
 {
@@ -140,13 +177,38 @@ int main()
 	listen(socketd, 10);
 	socklen_t l = sizeof(client);
 	//注册信号处理器，捕获子进程退出信号
-	if(signal(SIGCHLD,handler)==SIG_ERR)
+	/*if(signal(SIGCHLD,handler)==SIG_ERR)
 	{
 		printf("signal() failed\n");
 		return -1;
-	}
+	}*/
+	init(socketd,&pool);
+
 	while (1) {
-		int n = accept(socketd, (sockaddr*)&client, &l);
+		/***I/O多路复用并发***/
+		int confd;
+		pool.ready_set=pool.read_set;
+		pool.nready=select(pool.maxfd+1,&pool.ready_set,NULL,NULL,NULL);
+		if(FD_ISSET(socketd,&pool.ready_set))
+		{
+			confd=accept(socketd,(sockaddr*)&client,&l);
+			add_pool(confd,&pool);
+		}
+		for(int i=0;i<1024&&pool.nready>0;i++)
+		{
+			confd=pool.clientfd[i];
+			if(confd>0&&FD_ISSET(confd,&pool.ready_set))
+			{
+				handle_request(confd);
+				pool.clientfd[i]=-1;
+				FD_CLR(confd,&pool.read_set);
+				close(confd);
+			}
+		}
+		/****end***/
+
+		/****多进程并发*****/
+		/*int n = accept(socketd, (sockaddr*)&client, &l);
 		int p_id=fork();
 		if(p_id==0)
 		{
@@ -155,7 +217,8 @@ int main()
 			close(n);
 			exit(0);
 		}
-		close(n);
+		close(n);*/
+		/****end*/
 	}
 	close(socketd);
 }
