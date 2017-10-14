@@ -133,13 +133,14 @@ void handle_request(int n)
 }*/
 //I/O多路复用
 struct cf{
-	int maxfd;
+	int maxfd;//最大的文件描述符
 	int maxi;
 	int nready;
-	int clientfd[1024];
+	int clientfd[1024];//已连接的
 	fd_set read_set;
 	fd_set ready_set;
 }pool;
+//初始化pool
 void init(int listenfd,struct cf *pool)
 {
 	pool->maxi=-1;
@@ -150,6 +151,7 @@ void init(int listenfd,struct cf *pool)
 	FD_SET(listenfd,&pool->read_set);
 	return;
 }
+//将描述符添加到pool里面
 void add_pool(int confd,struct cf *pool)
 {
 	int i;
@@ -190,7 +192,7 @@ int main()
 		/***I/O多路复用并发***/
 		int confd;
 		pool.ready_set=pool.read_set;
-		pool.nready=select(pool.maxfd+1,&pool.ready_set,NULL,NULL,NULL);
+		pool.nready=select(pool.maxfd+1,&pool.ready_set,NULL,NULL,NULL);//阻塞
 		if(FD_ISSET(socketd,&pool.ready_set))
 		{
 			confd=accept(socketd,(sockaddr*)&client,&l);
