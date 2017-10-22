@@ -1,39 +1,65 @@
 #include "http.h"
-void getfilename(char a[],char filename[])
+#include "handle_file.h"
+#include "handle_request.h"
+using namespace std;
+struct filetype ft[]={
+ {".html", "text/html"},
+ {".xml", "text/xml"},
+ {".xhtml", "application/xhtml+xml"},
+ {".txt", "text/plain"},
+ {".rtf", "application/rtf"},
+ {".pdf", "application/pdf"},
+ {".word", "application/msword"},
+ {".png", "image/png"},
+ {".gif", "image/gif"},
+ {".jpg", "image/jpeg"},
+ {".jpeg", "image/jpeg"},
+ {".au", "audio/basic"},
+ {".mpeg", "video/mpeg"},
+ {".mpg", "video/mpeg"},
+ {".avi", "video/x-msvideo"},
+ {".gz", "application/x-gzip"},
+ {".tar", "application/x-tar"},
+ {NULL ,NULL}
+};
+void getfilename(struct request_header *RH)
 {
+	strcat(RH->filename,"./test");
 	int k =6;
-	for (size_t i = 0; i < strlen(a); i++)
+	for (size_t i = 0; i < strlen(RH->hd); i++)
 	{
-		if (a[i] == '/')
+		if (RH->hd[i] == '/')
 		{
-			for (int j = i; a[j] != ' '; j++)
-				filename[k++] = a[j];
+			for (int j = i; RH->hd[j] != ' '; j++)
+				RH->filename[k++] = RH->hd[j];
 			break;
 		}
 	}
-	filename[k] = '\0';
-	if(filename[strlen(filename)-1]=='/')
-		strcat(filename,"index.html");
+	RH->filename[k] = '\0';
+	if(RH->filename[strlen(RH->filename)-1]=='/')
+		strcat(RH->filename,"index.html");
 }
 //获取请求类型
-void get_type(char filename[], char type[])
+void get_type(struct request_header *RH)
 {
-	if (strstr(filename, ".html"))
-		strcpy(type, "text/html");
-	else
+	for(int i=0;ft[i].first!=NULL;i++)
 	{
-		if (strstr(filename, ".gif"))
-			strcpy(type, "image/gif");
-		else
-			if (strstr(filename, ".jpg"))
-				strcpy(type, "image/jpeg");
-			else
-				if (strstr(filename, ".css"))
-					strcpy(type, "text/css");
-				else
-					if (strstr(filename, ".png"))
-						strcpy(type, "image/png");
-					else
-						strcpy(type, "text/plain");
+		if(strstr(RH->filename,ft[i].first))
+		{
+			strcpy(RH->filetype,ft[i].second);
+			return;
+		}
+
 	}
+}
+void get_request_method(struct request_header *RH)
+{
+	size_t i;
+	for(i=0;i<strlen(RH->hd);i++)
+	{
+		if(RH->hd[i]==' ')
+			break;
+		RH->method[i]=RH->hd[i];
+	}
+	RH->method[i]='\0';
 }

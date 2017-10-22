@@ -1,5 +1,10 @@
 #ifndef hf
 #define hf
-void getfilename(char a[],char filename[]);
-void get_type(char filename[],char type[]);
+struct filetype{
+	const char *first;
+	const char *second;
+};
+void getfilename(struct request_header *RH);
+void get_type(struct request_header *RH);
+void get_request_method(struct request_header *RH);
 #endif
