@@ -4,7 +4,7 @@
 struct request_header{
 	char hd[H_SIZE];//请求头内容
 	char method[H_SIZE];//请求类型
-	char filename[H_SIZE];//请求文件名
+	char uri[H_SIZE];//请求uri
 	char filetype[H_SIZE];
 	int fd;//连接描述符
 	int filesize;//文件大小

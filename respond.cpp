@@ -38,7 +38,7 @@ void respond_header(struct request_header *RH)
 void respond_body(struct request_header *RH)
 {
 	//文件映射
-	int stcd=open(RH->filename,O_RDONLY,0);
+	int stcd=open(RH->uri,O_RDONLY,0);
 	char *srcp;
 	srcp=static_cast<char*>(mmap(0,RH->filesize,PROT_READ,MAP_PRIVATE,stcd,0));
 	close(stcd);

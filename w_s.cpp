@@ -1,5 +1,6 @@
 #include "http.h"
 #include "handle_request.h"
+using namespace std;
 struct cf{
 	int maxfd;//最大的文件描述符
 	int maxi;
@@ -41,12 +42,25 @@ void add_pool(int confd,struct cf *pool)
 int main()
 {
 	struct sockaddr_in client, server;
-	int socketd = socket(AF_INET, SOCK_STREAM, 0);
+	int socketd;
+	if((socketd=socket(AF_INET, SOCK_STREAM, 0))<0)
+	{
+		cout<<"error"<<endl;
+		exit(-1);
+	}
 	server.sin_family = AF_INET;
 	server.sin_port = htons(8888);
 	server.sin_addr.s_addr =htonl(INADDR_ANY);
-	bind(socketd, (sockaddr*)&server, sizeof(server));
-	listen(socketd, 10);
+	if(bind(socketd, (sockaddr*)&server, sizeof(server))<0)
+	{
+		cout<<"error"<<endl;
+		exit(-1);
+	}
+	if(listen(socketd, 10)<0)
+	{
+		cout<<"error"<<endl;
+		exit(-1);
+	}
 	socklen_t l = sizeof(client);
 	//注册信号处理器，捕获子进程退出信号
 	/*if(signal(SIGCHLD,handler)==SIG_ERR)
@@ -55,7 +69,6 @@ int main()
 		return -1;
 	}*/
 	init(socketd,&pool);
-
 	while (1) {
 		/***I/O多路复用并发***/
 		int confd;

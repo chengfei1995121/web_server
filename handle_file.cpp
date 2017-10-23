@@ -24,27 +24,27 @@ struct filetype ft[]={
 };
 void getfilename(struct request_header *RH)
 {
-	strcat(RH->filename,"./test");
+	strcat(RH->uri,"./test");
 	int k =6;
 	for (size_t i = 0; i < strlen(RH->hd); i++)
 	{
 		if (RH->hd[i] == '/')
 		{
 			for (int j = i; RH->hd[j] != ' '; j++)
-				RH->filename[k++] = RH->hd[j];
+				RH->uri[k++] = RH->hd[j];
 			break;
 		}
 	}
-	RH->filename[k] = '\0';
-	if(RH->filename[strlen(RH->filename)-1]=='/')
-		strcat(RH->filename,"index.html");
+	RH->uri[k] = '\0';
+	if(RH->uri[strlen(RH->uri)-1]=='/')
+		strcat(RH->uri,"index.html");
 }
 //获取请求类型
 void get_type(struct request_header *RH)
 {
 	for(int i=0;ft[i].first!=NULL;i++)
 	{
-		if(strstr(RH->filename,ft[i].first))
+		if(strstr(RH->uri,ft[i].first))
 		{
 			strcpy(RH->filetype,ft[i].second);
 			return;
