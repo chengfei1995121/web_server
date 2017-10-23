@@ -7,7 +7,6 @@
 using namespace std;
 void handle_request(int n)
 {
-	int a;
 	struct request_header H;
 	struct stat sbuf;
 	H.fd=n;
