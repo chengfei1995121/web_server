@@ -58,7 +58,7 @@ int main()
 		cout<<"error2"<<endl;
 		exit(-1);
 	}
-	if(listen(socketd, 10)<0)
+	if(listen(socketd, 200)<0)
 	{
 		cout<<"error3"<<endl;
 		exit(-1);
@@ -95,16 +95,25 @@ int main()
 			if(socketd==events[i].data.fd)
 			{
 				confd=accept(socketd,(sockaddr*)&client,&l);
+				cout<<confd<<endl;
 				event.data.fd=confd;
-				event.events=EPOLLET|EPOLLET;
-				epoll_ctl(efd,EPOLL_CTL_ADD,confd,&event);
+				event.events=EPOLLIN | EPOLLET;
+				if(epoll_ctl(efd,EPOLL_CTL_ADD,confd,&event)<0)
+				{
+					cout<<"ctl error"<<endl;
+					exit(-1);
+				}
+				
 			}
 			else 
 			{
+				cout<<2<<endl;
 				if(events[i].data.fd>0)
 				{
+					cout<<3<<endl;
 					confd=events[i].data.fd;
 					handle_request(confd);
+					cout<<4<<endl;
 					epoll_ctl(efd,EPOLL_CTL_DEL,confd,&event);
 					close(confd);
 				}
