@@ -19,6 +19,7 @@ void respond(struct request_header *RH)
 	cf.read(a, 1000000);
 	cout <<"2:"<< strlen(a) << endl;
 	*/
+	cout<<"uri:"<<RH->uri<<endl;
 	respond_header(RH);
 	respond_body(RH);
 

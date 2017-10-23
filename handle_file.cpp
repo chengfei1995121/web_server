@@ -20,12 +20,14 @@ struct filetype ft[]={
  {".avi", "video/x-msvideo"},
  {".gz", "application/x-gzip"},
  {".tar", "application/x-tar"},
+ {".css", "text/css"},
+ {".js","application/javascript"},
  {NULL ,NULL}
 };
 void getfilename(struct request_header *RH)
 {
-	strcat(RH->uri,"./test");
-	int k =6;
+	strcat(RH->uri,"./test/web-page");
+	int k =15;
 	for (size_t i = 0; i < strlen(RH->hd); i++)
 	{
 		if (RH->hd[i] == '/')
