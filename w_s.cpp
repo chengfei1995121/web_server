@@ -45,7 +45,7 @@ int main()
 	int socketd;
 	if((socketd=socket(AF_INET, SOCK_STREAM, 0))<0)
 	{
-		cout<<"error"<<endl;
+		cout<<"error1"<<endl;
 		exit(-1);
 	}
 	server.sin_family = AF_INET;
@@ -53,12 +53,12 @@ int main()
 	server.sin_addr.s_addr =htonl(INADDR_ANY);
 	if(bind(socketd, (sockaddr*)&server, sizeof(server))<0)
 	{
-		cout<<"error"<<endl;
+		cout<<"error2"<<endl;
 		exit(-1);
 	}
 	if(listen(socketd, 10)<0)
 	{
-		cout<<"error"<<endl;
+		cout<<"error3"<<endl;
 		exit(-1);
 	}
 	socklen_t l = sizeof(client);
