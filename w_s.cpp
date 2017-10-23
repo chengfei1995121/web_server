@@ -1,6 +1,8 @@
 #include "http.h"
 #include "handle_request.h"
+#include<sys/epoll.h>
 using namespace std;
+#define MAXEVENT 1000
 struct cf{
 	int maxfd;//最大的文件描述符
 	int maxi;
@@ -42,7 +44,7 @@ void add_pool(int confd,struct cf *pool)
 int main()
 {
 	struct sockaddr_in client, server;
-	int socketd;
+	int socketd,confd;
 	if((socketd=socket(AF_INET, SOCK_STREAM, 0))<0)
 	{
 		cout<<"error1"<<endl;
@@ -68,10 +70,53 @@ int main()
 		printf("signal() failed\n");
 		return -1;
 	}*/
-	init(socketd,&pool);
+	//init(socketd,&pool);select池初始化
+	int efd;
+	struct epoll_event event;
+	struct epoll_event *events;
+	if((efd=epoll_create1(0))<0)
+	{
+		cout<<"epoll error"<<endl;
+		exit(-1);
+	}
+	event.data.fd=socketd;
+	event.events=EPOLLIN | EPOLLET;
+	epoll_ctl(efd,EPOLL_CTL_ADD,socketd,&event);
+	if((events=(struct epoll_event *)malloc(MAXEVENT*sizeof(struct epoll_event)))==NULL)
+	{
+		cout<<"fail"<<endl;
+		exit(-1);
+	}
 	while (1) {
-		/***I/O多路复用并发***/
-		int confd;
+		/***I/O多路复用 epoll***/
+		int num=epoll_wait(efd,events,MAXEVENT,200);
+		for(int i=0;i<num;i++)
+		{
+			if(socketd==events[i].data.fd)
+			{
+				confd=accept(socketd,(sockaddr*)&client,&l);
+				event.data.fd=confd;
+				event.events=EPOLLET|EPOLLET;
+				epoll_ctl(efd,EPOLL_CTL_ADD,confd,&event);
+			}
+			else 
+			{
+				if(events[i].data.fd>0)
+				{
+					confd=events[i].data.fd;
+					handle_request(confd);
+					epoll_ctl(efd,EPOLL_CTL_DEL,confd,&event);
+					close(confd);
+				}
+			
+			}
+		
+		}
+
+
+		/***end***/
+		/***I/O多路复用并发 select***/
+		/*int confd;
 		pool.ready_set=pool.read_set;
 		pool.nready=select(pool.maxfd+1,&pool.ready_set,NULL,NULL,NULL);//阻塞
 		if(FD_ISSET(socketd,&pool.ready_set))
@@ -89,7 +134,7 @@ int main()
 				FD_CLR(confd,&pool.read_set);
 				close(confd);
 			}
-		}
+		}*/
 		/****end***/
 
 		/****多进程并发*****/
@@ -105,6 +150,8 @@ int main()
 		close(n);*/
 		/****end*/
 	}
+	free(events);
+	close(efd);
 	close(socketd);
 }
 
