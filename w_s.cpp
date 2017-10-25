@@ -2,7 +2,7 @@
 #include "handle_request.h"
 #include<sys/epoll.h>
 using namespace std;
-#define MAXEVENT 1000
+#define MAXEVENT 100000
 struct cf{
 	int maxfd;//最大的文件描述符
 	int maxi;
@@ -80,7 +80,7 @@ int main()
 		exit(-1);
 	}
 	event.data.fd=socketd;
-	event.events=EPOLLIN | EPOLLET;
+	event.events=EPOLLIN|EPOLLET;
 	epoll_ctl(efd,EPOLL_CTL_ADD,socketd,&event);
 	if((events=(struct epoll_event *)malloc(MAXEVENT*sizeof(struct epoll_event)))==NULL)
 	{
@@ -89,14 +89,15 @@ int main()
 	}
 	while (1) {
 		/***I/O多路复用 epoll***/
-		int num=epoll_wait(efd,events,MAXEVENT,200);
+		int num=epoll_wait(efd,events,MAXEVENT,-1);
+		cout<<num<<endl;
 		for(int i=0;i<num;i++)
 		{
 			if(socketd==events[i].data.fd)
 			{
-				confd=accept(socketd,(sockaddr*)&client,&l);
-				cout<<confd<<endl;
+				confd=accept(socketd,(struct sockaddr*)&client,&l);
 				event.data.fd=confd;
+				cout<<confd<<endl;
 				event.events=EPOLLIN | EPOLLET;
 				if(epoll_ctl(efd,EPOLL_CTL_ADD,confd,&event)<0)
 				{
@@ -107,13 +108,12 @@ int main()
 			}
 			else 
 			{
-				cout<<2<<endl;
-				if(events[i].data.fd>0)
+				if((events[i].events&EPOLLIN)&&events[i].data.fd>0)
 				{
-					cout<<3<<endl;
+					//cout<<3<<endl;
 					confd=events[i].data.fd;
 					handle_request(confd);
-					cout<<4<<endl;
+					//cout<<4<<endl;
 					epoll_ctl(efd,EPOLL_CTL_DEL,confd,&event);
 					close(confd);
 				}

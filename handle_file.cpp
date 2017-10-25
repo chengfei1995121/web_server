@@ -28,6 +28,8 @@ void getfilename(struct request_header *RH)
 {
 	strcat(RH->uri,"./test/web-page");
 	int k =15;
+	//strcat(RH->uri,"./test");
+	//int k=6;
 	for (size_t i = 0; i < strlen(RH->hd); i++)
 	{
 		if (RH->hd[i] == '/')
