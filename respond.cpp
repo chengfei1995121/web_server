@@ -20,7 +20,7 @@ void respond(struct request_header *RH)
 	cf.read(a, 1000000);
 	cout <<"2:"<< strlen(a) << endl;
 	*/
-	cout<<"uri:"<<RH->uri<<endl;
+	//cout<<"uri:"<<RH->uri<<endl;
 	respond_header(RH);
 	respond_body(RH);
 
@@ -45,11 +45,11 @@ void respond_body(struct request_header *RH)
 	int w,nwrite=0;
 	srcp=static_cast<char*>(mmap(0,RH->filesize,PROT_READ,MAP_PRIVATE,stcd,0));
 	close(stcd);
-	while((w=write(RH->fd,srcp+nwrite,RH->filesize-nwrite))!=0)
+	while((w=write(RH->fd,srcp+nwrite,RH->filesize))!=0)
 	{
 		if(w==-1)
 		{
-			if(errno=EINTR)
+			if(errno==EINTR)
 				continue;
 			else 
 				break;

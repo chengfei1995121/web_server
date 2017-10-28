@@ -11,4 +11,5 @@ struct request_header{
 };
 void handle_request(int n);
 void read_header(struct request_header *);
+int no_block(int fd);
 #endif

@@ -9,13 +9,14 @@
 using namespace std;
 void handle_request(int n)
 {
-	fcntl(n,F_SETFL,O_NONBLOCK);
 	struct request_header H;
 	struct stat sbuf;
+	if(no_block(n)<0)
+		return;
 	H.fd=n;
 	H.hd=(char *)malloc(ONEMAX);
 	read_header(&H);
-	//int l = read(n,H.hd, MAXSIZE);
+	//int l = read(n,H.hd, ONEMAX);
 	//H.hd[l] = '\0';
 	cout << H.hd << endl;//打印请求头
 	getfilename(&H);//获取文件名
@@ -44,7 +45,6 @@ void read_header(struct request_header *H)
 		l=read(H->fd,H->hd+nread,ONEMAX-nread);
 		if(l>0)
 		{
-			cout<<l<<endl;
 			nread+=l;
 		}
 		else if(l==0)
@@ -60,4 +60,16 @@ void read_header(struct request_header *H)
 	}
 	H->hd[nread]='\0';
 	return;
+}
+//非阻塞I/O
+int no_block(int fd)
+{
+	int s=fcntl(fd,F_SETFL,O_NONBLOCK);
+	if(s<0)
+	{
+		cout<<"fetcl"<<endl;
+		return -1;
+	}
+	else 
+		return 1;
 }
