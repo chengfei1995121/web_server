@@ -2,6 +2,7 @@
 #include "respond.h"
 #include "handle_file.h"
 #include "handle_request.h"
+#include<errno.h>
 #define B_SIZE 10000
 using namespace std;
 void respond(struct request_header *RH)
@@ -41,8 +42,21 @@ void respond_body(struct request_header *RH)
 	//文件映射
 	int stcd=open(RH->uri,O_RDONLY,0);
 	char *srcp;
+	int w,nwrite=0;
 	srcp=static_cast<char*>(mmap(0,RH->filesize,PROT_READ,MAP_PRIVATE,stcd,0));
 	close(stcd);
-	write(RH->fd,srcp,RH->filesize);
+	while((w=write(RH->fd,srcp+nwrite,RH->filesize-nwrite))!=0)
+	{
+		if(w==-1)
+		{
+			if(errno=EINTR)
+				continue;
+			else 
+				break;
+		}
+		nwrite+=w;
+		if(nwrite==RH->filesize)
+			break;
+	}
 	munmap(srcp,RH->filesize);
 }
