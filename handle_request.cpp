@@ -35,6 +35,7 @@ void handle_request(int n)
 	H.filesize=sbuf.st_size;
 	respond(&H);//响应
 	free(H.hd);
+	close(n);
 	}
 }
 void read_header(struct request_header *H)

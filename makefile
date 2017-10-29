@@ -1,6 +1,7 @@
 web_server:handle_request.o error.o handle_file.o respond.o w_s.o 
-	g++ -o web_server handle_request.o error.o handle_file.o respond.o w_s.o 
-
+	g++ -o web_server threadpool.o handle_request.o error.o handle_file.o respond.o w_s.o -l pthread
+threadpool.o:threadpool.cpp 
+	g++ -c threadpool.cpp
 handle_request.o:handle_request.cpp
 	g++ -c handle_request.cpp 
 error.o:error.cpp 
@@ -11,6 +12,5 @@ respond.o:respond.cpp
 	g++ -c respond.cpp 
 w_s.o:w_s.cpp 
 	g++ -c w_s.cpp 
-
 clean:
 	rm -rf *.o

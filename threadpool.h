@@ -3,8 +3,8 @@
 #include "http.h"
 #include<pthread.h>
 typedef struct task{
-	void *(*func) (void *arg);
-	void *arg;
+	void (*func) (int fd);
+	int fd;
 	struct task *next;
 }Thread_task;
 typedef struct pool{
@@ -16,6 +16,6 @@ typedef struct pool{
 	int cur_queue_size;
 }Thread_pool;
 void pool_init(int m);
-int pool_add(void*(*func) (void *arg),void *arg);
+int pool_add(void (*func) (int fd),int fd);
 void *thread_process(void *arg);
 #endif

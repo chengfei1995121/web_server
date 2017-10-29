@@ -1,9 +1,11 @@
 #include "http.h"
 #include "handle_request.h"
+#include "threadpool.h"
 #include<sys/epoll.h>
 using namespace std;
 #define MAXEVENT 100000
-struct cf{
+//static Thread_pool *pool=NULL;
+/*struct cf{
 	int maxfd;//最大的文件描述符
 	int maxi;
 	int nready;
@@ -40,7 +42,7 @@ void add_pool(int confd,struct cf *pool)
 			break;
 		}
 	}
-}
+}*/
 int main()
 {
 	struct sockaddr_in client, server;
@@ -50,6 +52,7 @@ int main()
 		cout<<"error1"<<endl;
 		exit(-1);
 	}
+	pool_init(10);
 	server.sin_family = AF_INET;
 	server.sin_port = htons(8888);
 	server.sin_addr.s_addr =htonl(INADDR_ANY);
@@ -112,10 +115,10 @@ int main()
 				{
 					//cout<<3<<endl;
 					confd=events[i].data.fd;
-					handle_request(confd);
+					//handle_request(confd);
 					//cout<<4<<endl;
+					pool_add(handle_request,confd);
 					epoll_ctl(efd,EPOLL_CTL_DEL,confd,&event);
-					close(confd);
 				}
 			
 			}

@@ -1,5 +1,6 @@
 #include"threadpool.h"
 using namespace std;
+void (*func) (int fd);
 static Thread_pool *pool=NULL;
 void pool_init(int m)
 {
@@ -13,17 +14,26 @@ void pool_init(int m)
 	for(int i=0;i<m;i++)
 		pthread_create(&(pool->threadid[i]),NULL,thread_process,NULL);
 }
-int pool_add(void*(*func) (void *arg),void *arg)
+int pool_add(void (*func) (int fd),int fd)
 {
 	Thread_task *new_task=(Thread_task *)malloc(sizeof(Thread_task));
+	if(new_task==NULL)
+	{
+		cout<<"malloc fail"<<endl;
+		return -1;
+	}
 	new_task->func=func;
-	new_task->arg=arg;
+	new_task->fd=fd;
 	new_task->next=NULL;
 	pthread_mutex_lock(&(pool->queue_lock));
 	Thread_task *mumber=pool->queue_head;
+	if(mumber!=NULL){
 	while(mumber->next!=NULL)
 		mumber=mumber->next;
 	mumber->next=new_task;
+	}
+	else 
+		pool->queue_head=new_task;
 	pool->cur_queue_size++;
 	pthread_mutex_unlock(&(pool->queue_lock));
 	if(pool->cur_queue_size>0)
@@ -37,13 +47,20 @@ void *thread_process(void *arg)
 	while(1)
 	{
 		pthread_mutex_lock(&(pool->queue_lock));
-		if(pool->cur_queue_size==0)
+		//记得用while
+		while(pool->cur_queue_size==0)
 			pthread_cond_wait(&(pool->queue_ready),&(pool->queue_lock));
 		pool->cur_queue_size--;
 		Thread_task *worker=pool->queue_head;
+		if(worker==NULL)
+		{
+			cout<<"empty"<<endl;
+			exit(-1);
+		}
 		pool->queue_head=worker->next;
 		pthread_mutex_unlock(&(pool->queue_lock));
-		(*worker->func)(worker->arg);
+		(*worker->func)(worker->fd);
 		free(worker);
 	}
+	return NULL;
 }
