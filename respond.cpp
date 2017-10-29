@@ -32,9 +32,9 @@ void respond(struct request_header *RH)
 //返回头部消息
 void respond_header(struct request_header *RH)
 {
-	char buf[B_SIZE]="http/1.1 200 ok\r\nAccept-Ranges:bytes\r\nServer:cf web server\r\nContent-type:";
-	sprintf(buf,"%s%s\r\nContent-length:%d\r\n",buf,RH->filetype,RH->filesize);
-	strcat(buf,"Connection:keep-alive\r\n\r\n");
+	char buf[B_SIZE]="http/1.0 200 ok\r\nAccept-Ranges:bytes\r\nServer:cf web server\r\nContent-type:";
+	sprintf(buf,"%s%s\r\nContent-length:%d\r\n\r\n",buf,RH->filetype,RH->filesize);
+	//strcat(buf,"Connection:close\r\n\r\n");
 	write(RH->fd,buf,strlen(buf));
 }
 //返回主体内容
