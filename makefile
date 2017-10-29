@@ -1,4 +1,4 @@
-web_server:handle_request.o error.o handle_file.o respond.o w_s.o 
+web_server:handle_request.o error.o handle_file.o respond.o w_s.o threadpool.o 
 	g++ -o web_server threadpool.o handle_request.o error.o handle_file.o respond.o w_s.o -l pthread
 threadpool.o:threadpool.cpp 
 	g++ -c threadpool.cpp

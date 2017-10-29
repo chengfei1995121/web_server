@@ -9,6 +9,7 @@
 using namespace std;
 void handle_request(int n)
 {
+	cout<<"fd:"<<n<<endl;
 	struct request_header H;
 	struct stat sbuf;
 	if(no_block(n)<0)
@@ -35,7 +36,7 @@ void handle_request(int n)
 	H.filesize=sbuf.st_size;
 	respond(&H);//响应
 	free(H.hd);
-	close(n);
+	//close(n);
 	}
 }
 void read_header(struct request_header *H)
