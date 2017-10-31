@@ -121,9 +121,9 @@ int main()
 				{
 					//cout<<3<<endl;
 					confd=events[i].data.fd;
-					//handle_request(confd);
+					handle_request(confd);
 					//cout<<4<<endl;
-					pool_add(handle_request,confd);
+					//pool_add(handle_request,confd);
 					epoll_ctl(efd,EPOLL_CTL_DEL,confd,&event);
 				}
 			

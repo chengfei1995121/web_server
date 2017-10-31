@@ -11,6 +11,10 @@ handle_file.o:handle_file.cpp
 respond.o:respond.cpp 
 	g++ -c respond.cpp 
 w_s.o:w_s.cpp 
-	g++ -c w_s.cpp 
+	g++ -c w_s.cpp
+php_parse:php_parse.o 
+	g++ -o  php_parse php_parse.o 
+php_parse.o:php_parse.cpp 
+	g++ -c php_parse.cpp
 clean:
 	rm -rf *.o

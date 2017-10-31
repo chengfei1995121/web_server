@@ -25,6 +25,7 @@ void handle_request(int n)
 	if(stat(H.uri,&sbuf)<0)	
 	{
 		clienterror(H.fd);
+		close(n);
 		return;
 		
 	}
