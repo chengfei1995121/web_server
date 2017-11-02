@@ -4,6 +4,7 @@
 #include "respond.h"
 #include "handle_file.h"
 #include<errno.h>
+#include "php_parse.h"
 #define MAXSIZE 100000
 #define ONEMAX 1024*1024
 using namespace std;
@@ -22,22 +23,34 @@ void handle_request(int n)
 	getfilename(&H);//获取文件名
 	//cout<<filename<<endl;
 	//假如文件不存在，返回错误 stat函数用于读取文件信息
+	cout<<"uri:"<<H.uri<<endl;
 	if(stat(H.uri,&sbuf)<0)	
 	{
 		clienterror(H.fd);
 		close(n);
 		return;
 		
-	}
+	}	
 	get_request_method(&H);
 	get_type(&H);
+	if(strstr(H.uri,".php"))
+	{	
+		char context[10000];
+		handle_dynamic(H.uri,context);
+		H.filesize=strlen(context);
+		respond_header(&H);
+		write(H.fd,context,strlen(context));
+	}
+	else 
+	{
 	if(!strcmp("GET",H.method)){
 	//cout << filename << endl;
 	H.filesize=sbuf.st_size;
 	respond(&H);//响应
+	}
+	}
 	free(H.hd);
 	close(n);
-	}
 }
 void read_header(struct request_header *H)
 {

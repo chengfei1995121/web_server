@@ -139,14 +139,19 @@ void makeendrequest(int fd,int id)
 	endrecord=makerequestheader(FCGI_PARAMS,id,0,0);
 	write(fd,(char *)&endrecord,sizeof(endrecord));
 }
-void printf_html(char *context)
+void printf_html(char *context,char *htmltext)
 {
 	for(;*context!='\0';context++)
 	{
 		if(*context=='<')
 		{
 			while(*context!='\0')
-				printf("%c",*context);
+			{
+				*htmltext=*context;
+				//printf("%c",*context);
+				context++;
+				htmltext++;
+			}
 			break;
 		}
 	}
@@ -176,25 +181,30 @@ int open_listent()
 	}
 	return fd;
 }
-int main()
+void printf_php_error(char *context,char *htmltext)
+{
+	strcpy(htmltext,context);
+}
+void handle_dynamic(char *uri,char *htmltext)
 {
 	int id=1;
 	int fd=open_listent();
 	FCGI_BeginRequestRecord record=makebeginrecord(id);
 	FCGI_Header header;
-	int l=write(fd,(char *)&record,sizeof(record));
+	write(fd,(char *)&record,sizeof(record));
 	char a[100]={"SCRIPT_FILENAME"};
-	char b[100]={"/home/chengfei/index.php"};
+	char b[100]={"/home/chengfei/server/web_server"};
 	char c[100]={"REQUEST_METHOD"};
 	char d[100]={"GET"};
 	char e[100]={"QUERY_STRING"};
 	char f[100]={"CF=good"};
-	sendparme(fd,id,a,b);
+	//strcat(b,uri);
+	sendparme(fd,id,a,uri);
 	sendparme(fd,id,c,d);
 	sendparme(fd,id,e,f);
 	makeendrequest(fd,id);
-	int n=read(fd,&header,sizeof(header));
 	char context[1000];
+	int n=read(fd,&header,sizeof(header));
 	printf("类型 %d\n",header.type);
 	if(n>0)
 	{
@@ -204,16 +214,17 @@ int main()
 		int m=read(fd,context,conlen);
 		context[m]='\0';
 		printf("%s\n",context);
-		//printf_html(context);
+		printf_html(context,htmltext);
 		}
 		else 
 		{
 			if(header.type==7)
 			{
 				int conlen=(header.contentLengthB1>>8)+header.contentLengthB0;
-				int m=read(fd,context,1000);
+				int m=read(fd,context,conlen);
 				context[m]='\0';
 				printf("%s\n",context);
+				printf_php_error(context,htmltext);
 			}
 		}
 	}

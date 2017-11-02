@@ -1,3 +1,6 @@
+<?php
+include("conn.php");
+?>
 <html>
 	<head>
 		<meta charset='utf-8'>
@@ -5,8 +8,10 @@
 		
 	</head>
 	<body>
-		<p>hello,world;</p>
-		<img src="1.jpg" width="100px" height="100px">
-		<img src='c.jpg'>
+		<?php
+echo "hello world";
+echo $_GET['CF'];
+//echo $_GET['jf'];
+?>
 	</body>
 </html>

@@ -50,4 +50,13 @@ typedef struct{
 	FCGI_EndRequestBody body;
 
 }FCGI_EndRequestRecord;
+FCGI_Header makerequestheader(int,int,int,int);
+FCGI_BeginRequestBody makebeginbody(int);
+FCGI_BeginRequestRecord makebeginrecord(int);
+bool makeNameValueBody(char*,int,char*,int,unsigned char*,int*);
+void sendparme(int,int,char*,char*);
+void makeendrequest(int,int);
+void pritf_html(char *context);
+int open_listent();
+void handle_dynamic(char *uri,char*);
 #endif

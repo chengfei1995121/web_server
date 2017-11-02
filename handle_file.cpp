@@ -22,14 +22,15 @@ struct filetype ft[]={
  {".tar", "application/x-tar"},
  {".css", "text/css"},
  {".js","application/javascript"},
+ {".php","text/html"},
  {NULL ,NULL}
 };
 void getfilename(struct request_header *RH)
 {
-	strcat(RH->uri,"./test/web-page");
-	int k =15;
-	//strcat(RH->uri,"./test");
-	//int k=6;
+//	strcat(RH->uri,"./test/web-page");
+//	int k =15;
+	strcat(RH->uri,"/home/chengfei/server/web_server/test");
+	int k=strlen(RH->uri);
 	for (size_t i = 0; i < strlen(RH->hd); i++)
 	{
 		if (RH->hd[i] == '/')
