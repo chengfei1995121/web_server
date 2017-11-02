@@ -4,7 +4,7 @@
 FCGI_Header makerequestheader(int type,int requestId,int contentLength,int paddingLength)
 {
 	FCGI_Header header;
-	header.version=1;
+	header.version=FCGI_VERSION;
 	header.type=(unsigned char)type;
 	header.requestIdB1=(unsigned char)((requestId>>8)&0xff);
 	header.requestIdB0=(unsigned char)(requestId&0xff);
@@ -14,21 +14,21 @@ FCGI_Header makerequestheader(int type,int requestId,int contentLength,int paddi
 	header.reserved=0;
 	return header;
 }
-FCGI_BeginRequestBody makeBB(int role)
+FCGI_BeginRequestBody makebeginbody(int role)
 {
-	FCGI_BeginRequestBody bb;
-	bb.roleB1=(unsigned char)((role>>8)&0xff);
-	bb.roleB0=(unsigned char)(role&0xff);
-	bb.flags=0;
-	memset(bb.reserved,0,sizeof(bb.reserved));
-	return bb;
+	FCGI_BeginRequestBody body;
+	body.roleB1=(unsigned char)((role>>8)&0xff);
+	body.roleB0=(unsigned char)(role&0xff);
+	body.flags=0;
+	memset(body.reserved,0,sizeof(body.reserved));
+	return body;
 }
-FCGI_BeginRequestRecord makerecord()
+FCGI_BeginRequestRecord makebeginrecord(int REQUEST_ID)
 {
-	FCGI_BeginRequestRecord BR;
-	BR.header=makerequestheader(1,1,sizeof(BR.body),0);
-	BR.body=makeBB(1);
-	return BR;
+	FCGI_BeginRequestRecord beginrecord;
+	beginrecord.header=makerequestheader(FCGI_BEGIN_REQUEST,REQUEST_ID,sizeof(beginrecord.body),0);
+	beginrecord.body=makebeginbody(FCGI_RESPONDER);
+	return beginrecord;
 }
 bool makeNameValueBody(char *name,int nameLen,char *value,int valueLen,unsigned char *bodyptr,int *bodylenptr)
 {
@@ -66,25 +66,18 @@ bool makeNameValueBody(char *name,int nameLen,char *value,int valueLen,unsigned 
 	*bodylenptr=bodyptr-start;
 	return true;
 }
-void sendparme(int fd,char *name,char *value)
+void sendparme(int fd,int id,char *name,char *value)
 {
 	FCGI_Header header;
 	char request[1000];
 	int bufflen=0;
-	//int n=write(fd,(char *)&header,sizeof(header));
-	//memcpy(request,(char *)&header,8);
 	unsigned char buff[1000];
 	bzero(buff,sizeof(buff));
 	makeNameValueBody(name,strlen(name),value,strlen(value),buff,&bufflen);
-	//n=write(fd,buff,bufflen);
-	header=makerequestheader(4,1,bufflen,0);
-	//memcpy(request,(char *)&header,8);
-	//memcpy(request+8,buff,bufflen);
-	//printf("字符 %s\n",request);
-	//int n=write(fd,(char *)&header,sizeof(header));
-	write(fd,(char *)&header,8);
-	int m=write(fd,(char *)&buff,bufflen);
-	//printf("字符 %s\n",request);
+	header=makerequestheader(FCGI_PARAMS,id,bufflen,0);
+	memcpy(request,(char *)&header,REQUEST_HEADER_LEN);
+	memcpy(request+REQUEST_HEADER_LEN,(char*)&buff,bufflen);
+	int m=write(fd,request,bufflen+REQUEST_HEADER_LEN);
 	printf("\n %d %s\n",m,buff);
 	return;
 }
@@ -140,10 +133,10 @@ void sendparme(int fd,char *name,char *value)
         return -1;
     }
 }*/
-void makeendrequest(int fd)
+void makeendrequest(int fd,int id)
 {
 	FCGI_Header endrecord;
-	endrecord=makerequestheader(4,1,0,0);
+	endrecord=makerequestheader(FCGI_PARAMS,id,0,0);
 	write(fd,(char *)&endrecord,sizeof(endrecord));
 }
 void printf_html(char *context)
@@ -158,7 +151,7 @@ void printf_html(char *context)
 		}
 	}
 }
-int main()
+int open_listent()
 {
 	int fd;
 	struct sockaddr_in serveraddr;
@@ -171,29 +164,35 @@ int main()
 	serveraddr.sin_family=AF_INET;
 	serveraddr.sin_port=htons(9000);
 	serveraddr.sin_addr.s_addr=inet_addr("127.0.0.1");
-	//printf("2\n");
 	int confd=connect(fd,(sockaddr *)&serveraddr,sizeof(serveraddr));
-	//printf("3\n");
 	if(confd==0)
 	{
 			printf("已连接 %d",confd);
-			//exit(-1);
 	}
 	else 
 	{
 			printf("失败 %d",confd);
 			exit(-1);
 	}
-	FCGI_BeginRequestRecord record=makerecord();
+	return fd;
+}
+int main()
+{
+	int id=1;
+	int fd=open_listent();
+	FCGI_BeginRequestRecord record=makebeginrecord(id);
 	FCGI_Header header;
 	int l=write(fd,(char *)&record,sizeof(record));
 	char a[100]={"SCRIPT_FILENAME"};
 	char b[100]={"/home/chengfei/index.php"};
 	char c[100]={"REQUEST_METHOD"};
 	char d[100]={"GET"};
-	sendparme(fd,a,b);
-	sendparme(fd,c,d);
-	makeendrequest(fd);
+	char e[100]={"QUERY_STRING"};
+	char f[100]={"CF=good"};
+	sendparme(fd,id,a,b);
+	sendparme(fd,id,c,d);
+	sendparme(fd,id,e,f);
+	makeendrequest(fd,id);
 	int n=read(fd,&header,sizeof(header));
 	char context[1000];
 	printf("类型 %d\n",header.type);
@@ -202,15 +201,25 @@ int main()
 		if(header.type==6){
 		int conlen=(header.contentLengthB1>>8)+header.contentLengthB0;
 		printf("获取内容的长度 %d\n",conlen);
-		read(fd,context,conlen);
+		int m=read(fd,context,conlen);
+		context[m]='\0';
 		printf("%s\n",context);
 		//printf_html(context);
+		}
+		else 
+		{
+			if(header.type==7)
+			{
+				int conlen=(header.contentLengthB1>>8)+header.contentLengthB0;
+				int m=read(fd,context,1000);
+				context[m]='\0';
+				printf("%s\n",context);
+			}
 		}
 	}
 	else 
 	{
 		printf("长度 %d",n);
 	}
-	close(confd);
 	close(fd);
 }

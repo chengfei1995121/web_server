@@ -1,6 +1,18 @@
 #ifndef __FCGI__
 #define __FCGI__
 #include "http.h"
+#define REQUEST_HEADER_LEN 8
+
+#define FCGI_VERSION 1
+
+//type类型
+#define FCGI_BEGIN_REQUEST 1
+#define FCGI_END_REQUEST 3
+#define FCGI_PARAMS 4
+#define FCGI_STDIN 5
+#define FCGI_STDOUT 6
+#define FCGI_STDERR 7
+#define FCGI_DATA 8
 typedef struct{
 	unsigned char version;
 	unsigned char type;
@@ -11,7 +23,8 @@ typedef struct{
 	unsigned char paddingLength;
 	unsigned char reserved;
 }FCGI_Header;
-
+//role类型
+#define FCGI_RESPONDER 1
 typedef struct{
 	unsigned char roleB1;
 	unsigned char roleB0;
