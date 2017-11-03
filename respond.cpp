@@ -32,6 +32,7 @@ void respond(struct request_header *RH)
 //返回头部消息
 void respond_header(struct request_header *RH)
 {
+//	cout<<"content_type"<<RH->filetype<<"  filesize"<<RH->filesize<<endl;
 	char buf[B_SIZE]="http/1.0 200 ok\r\nAccept-Ranges:bytes\r\nServer:cf web server\r\nContent-type:";
 	sprintf(buf,"%s%s\r\nContent-length:%d\r\n\r\n",buf,RH->filetype,RH->filesize);
 	//strcat(buf,"Connection:close\r\n\r\n");

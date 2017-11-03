@@ -107,3 +107,42 @@ void get_postdata(struct request_header *RH)
 	RH->post[k]='\0';
 	cout<<"POST"<<RH->post<<endl;
 }
+void get_content_length_and_type(struct request_header *RH)
+{
+	int k=0,kk=0;
+	for(int i=0;i<strlen(RH->hd);i++)
+	{
+		if(RH->hd[i]==':')
+		{
+			if(RH->hd[i-1]=='h')
+			{
+				for(int j=i+1;RH->hd[j]!='\r';j++)
+				{
+					if(RH->hd[j]==' ')
+						continue;
+					RH->content_length[k]=RH->hd[j];
+					k++;
+				}
+				RH->content_length[k]='\0';
+			}
+			else 
+			{
+				if(RH->hd[i-1]=='e')
+				{
+					for(int j=i+1;RH->hd[j]!='\r';j++)
+					{	if(RH->hd[j]==' ')
+							continue;
+						RH->content_type[kk]=RH->hd[j];
+						kk++;
+					}
+
+				RH->content_type[kk]='\0';
+				break;
+				}
+				
+			}
+		}
+	}
+//	cout<<"content_length"<<RH->content_length<<endl;
+//	cout<<"content_type"<<RH->content_type<<endl;
+}

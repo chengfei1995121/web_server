@@ -2,6 +2,15 @@
 #include<arpa/inet.h>
 #include<malloc.h>
 #include "handle_request.h"
+char params[10][100]={
+	{"SCRIPT_FILENAME"},
+	{"REQUEST_METHOD"},
+	{"GET"},
+	{"QUERY_STRING"},
+	{"POST"},
+	{"CONTENT_LENGTH"},
+	{"CONTENT_TYPE"}
+};
 FCGI_Header makerequestheader(int type,int requestId,int contentLength,int paddingLength)
 {
 	FCGI_Header header;
@@ -87,7 +96,8 @@ void sendstdin(int fd,int id,char *Stdin)
 	FCGI_Header header;
 	header=makerequestheader(FCGI_STDIN,id,strlen(Stdin),0);
 	write(fd,(char *)&header,sizeof(header));
-	write(fd,Stdin,strlen(Stdin));
+	int n=write(fd,Stdin,strlen(Stdin));
+	printf("%d %s\n",n,Stdin);
 }
 /*int sendParamsRecord(
         int fd,
@@ -195,8 +205,9 @@ void printf_php_error(char *context,char *htmltext)
 }
 void handle_dynamic(struct request_header *H,char *htmltext)
 {
-	int id=1;
+	int id;
 	int fd=open_listent();
+	id=fd;
 	FCGI_BeginRequestRecord record=makebeginrecord(id);
 	FCGI_Header header;
 	write(fd,(char *)&record,sizeof(record));
@@ -205,6 +216,9 @@ void handle_dynamic(struct request_header *H,char *htmltext)
 	char d[100]={"GET"};
 	char e[100]={"QUERY_STRING"};
 	char f[100]={"POST"};
+	char g[100]={"CONTENT_LENGTH"};
+	char x[100]={"CONTENT_TYPE"};
+	char y[100]={"application/x-www-form-urlencoded"};
 	//strcat(b,uri);
 	if(strstr(H->method,"GET"))
 {	sendparme(fd,id,a,H->uri);
@@ -212,14 +226,17 @@ void handle_dynamic(struct request_header *H,char *htmltext)
 	if(strlen(H->getdata)!=0)
 		sendparme(fd,id,e,H->getdata);
 	makeendrequest(fd,id,FCGI_PARAMS);
+	//std::cout<<3<<std::endl;
 }
 else 
 {
 	if(strstr(H->method,"POST"))
 	{
-		sendparme(fd,id,a,H->uri);
-		sendparme(fd,id,c,f);
-		//makeendrequest(fd,id,FCGI_PARAMS);
+		sendparme(fd,id,params[0],H->uri);
+		sendparme(fd,id,params[6],H->content_type);
+		sendparme(fd,id,params[1],params[4]);
+		sendparme(fd,id,params[5],H->content_length);	
+		makeendrequest(fd,id,FCGI_PARAMS);	
 		sendstdin(fd,id,H->post);
 		makeendrequest(fd,id,FCGI_STDIN);
 	}

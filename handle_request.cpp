@@ -28,6 +28,7 @@ void handle_request(int n)
 	if(strstr(H.method,"POST"))
 	{
 		get_postdata(&H);
+		get_content_length_and_type(&H);
 	}
 	if(stat(H.uri,&sbuf)<0)	
 	{
@@ -36,7 +37,8 @@ void handle_request(int n)
 		return;
 	}	
 	if(strstr(H.uri,".php"))
-	{	
+	{
+		//cout<<1<<endl;
 		respond_php(&H);
 	}
 	else 
