@@ -1,6 +1,3 @@
-<?php
-include("conn.php");
-?>
 <html>
 	<head>
 		<meta charset='utf-8'>
@@ -8,10 +5,13 @@ include("conn.php");
 		
 	</head>
 	<body>
+<form method="POST" action="jd.php">
+<input name="cf" type="text">
+</form>
 		<?php
-echo "hello world";
+echo "hello";
 echo $_GET['CF'];
-//echo $_GET['jf'];
+echo $_GET['ZY'];
 ?>
 	</body>
 </html>

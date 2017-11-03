@@ -20,37 +20,51 @@ void handle_request(int n)
 	//int l = read(n,H.hd, ONEMAX);
 	//H.hd[l] = '\0';
 	cout << H.hd << endl;//打印请求头
-	getfilename(&H);//获取文件名
-	//cout<<filename<<endl;
+	getfileuri(&H);//获取文件路径
 	//假如文件不存在，返回错误 stat函数用于读取文件信息
 	cout<<"uri:"<<H.uri<<endl;
+	get_request_method(&H);
+	get_type(&H);
+	if(strstr(H.method,"POST"))
+	{
+		get_postdata(&H);
+	}
 	if(stat(H.uri,&sbuf)<0)	
 	{
 		clienterror(H.fd);
 		close(n);
 		return;
-		
 	}	
-	get_request_method(&H);
-	get_type(&H);
 	if(strstr(H.uri,".php"))
 	{	
-		char context[10000];
-		handle_dynamic(H.uri,context);
-		H.filesize=strlen(context);
-		respond_header(&H);
-		write(H.fd,context,strlen(context));
+		respond_php(&H);
 	}
 	else 
 	{
-	if(!strcmp("GET",H.method)){
-	//cout << filename << endl;
+	if(!strcmp("GET",H.method))
+	{
 	H.filesize=sbuf.st_size;
-	respond(&H);//响应
+	respond_static_html(&H);
 	}
 	}
 	free(H.hd);
 	close(n);
+}
+//响应静态内容
+void respond_static_html(struct request_header *H)
+{
+	respond_header(H);
+	respond_body(H);
+}
+//响应动态内容
+void respond_php(struct request_header *H)
+{
+		char context[10000];
+		memset(context,0,sizeof(context));
+		handle_dynamic(H,context);
+		H->filesize=strlen(context);
+		respond_header(H);
+		write(H->fd,context,strlen(context));
 }
 void read_header(struct request_header *H)
 {

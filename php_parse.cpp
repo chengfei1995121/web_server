@@ -1,6 +1,7 @@
 #include "php_parse.h"
 #include<arpa/inet.h>
 #include<malloc.h>
+#include "handle_request.h"
 FCGI_Header makerequestheader(int type,int requestId,int contentLength,int paddingLength)
 {
 	FCGI_Header header;
@@ -81,6 +82,13 @@ void sendparme(int fd,int id,char *name,char *value)
 	printf("\n %d %s\n",m,buff);
 	return;
 }
+void sendstdin(int fd,int id,char *Stdin)
+{
+	FCGI_Header header;
+	header=makerequestheader(FCGI_STDIN,id,strlen(Stdin),0);
+	write(fd,(char *)&header,sizeof(header));
+	write(fd,Stdin,strlen(Stdin));
+}
 /*int sendParamsRecord(
         int fd,
         char *name,
@@ -133,10 +141,10 @@ void sendparme(int fd,int id,char *name,char *value)
         return -1;
     }
 }*/
-void makeendrequest(int fd,int id)
+void makeendrequest(int fd,int id,int FCGI)
 {
 	FCGI_Header endrecord;
-	endrecord=makerequestheader(FCGI_PARAMS,id,0,0);
+	endrecord=makerequestheader(FCGI,id,0,0);
 	write(fd,(char *)&endrecord,sizeof(endrecord));
 }
 void printf_html(char *context,char *htmltext)
@@ -185,7 +193,7 @@ void printf_php_error(char *context,char *htmltext)
 {
 	strcpy(htmltext,context);
 }
-void handle_dynamic(char *uri,char *htmltext)
+void handle_dynamic(struct request_header *H,char *htmltext)
 {
 	int id=1;
 	int fd=open_listent();
@@ -193,16 +201,31 @@ void handle_dynamic(char *uri,char *htmltext)
 	FCGI_Header header;
 	write(fd,(char *)&record,sizeof(record));
 	char a[100]={"SCRIPT_FILENAME"};
-	char b[100]={"/home/chengfei/server/web_server"};
 	char c[100]={"REQUEST_METHOD"};
 	char d[100]={"GET"};
 	char e[100]={"QUERY_STRING"};
-	char f[100]={"CF=good"};
+	char f[100]={"POST"};
 	//strcat(b,uri);
-	sendparme(fd,id,a,uri);
+	if(strstr(H->method,"GET"))
+{	sendparme(fd,id,a,H->uri);
 	sendparme(fd,id,c,d);
-	sendparme(fd,id,e,f);
-	makeendrequest(fd,id);
+	if(strlen(H->getdata)!=0)
+		sendparme(fd,id,e,H->getdata);
+	makeendrequest(fd,id,FCGI_PARAMS);
+}
+else 
+{
+	if(strstr(H->method,"POST"))
+	{
+		sendparme(fd,id,a,H->uri);
+		sendparme(fd,id,c,f);
+		//makeendrequest(fd,id,FCGI_PARAMS);
+		sendstdin(fd,id,H->post);
+		makeendrequest(fd,id,FCGI_STDIN);
+	}
+	else 
+		return;
+}
 	char context[1000];
 	int n=read(fd,&header,sizeof(header));
 	printf("类型 %d\n",header.type);
@@ -211,7 +234,7 @@ void handle_dynamic(char *uri,char *htmltext)
 		if(header.type==6){
 		int conlen=(header.contentLengthB1>>8)+header.contentLengthB0;
 		printf("获取内容的长度 %d\n",conlen);
-		int m=read(fd,context,conlen);
+		int m=read(fd,context,1000);
 		context[m]='\0';
 		printf("%s\n",context);
 		printf_html(context,htmltext);

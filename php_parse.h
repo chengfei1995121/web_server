@@ -55,8 +55,8 @@ FCGI_BeginRequestBody makebeginbody(int);
 FCGI_BeginRequestRecord makebeginrecord(int);
 bool makeNameValueBody(char*,int,char*,int,unsigned char*,int*);
 void sendparme(int,int,char*,char*);
-void makeendrequest(int,int);
+void makeendrequest(int,int,int);
 void pritf_html(char *context);
 int open_listent();
-void handle_dynamic(char *uri,char*);
+void handle_dynamic(struct request_header*,char*);
 #endif

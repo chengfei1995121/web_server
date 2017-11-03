@@ -8,8 +8,12 @@ struct request_header{
 	char filetype[H_SIZE];
 	int fd;//连接描述符
 	int filesize;//文件大小
+	char getdata[H_SIZE];
+	char post[H_SIZE];
 };
 void handle_request(int n);
 void read_header(struct request_header *);
+void respond_php(struct request_header *);
+void respond_static_html(struct request_header *);
 int no_block(int fd);
 #endif
