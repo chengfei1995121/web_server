@@ -71,6 +71,7 @@ int main()
 		cout<<"error3"<<endl;
 		exit(-1);
 	}
+	no_block(socketd);
 	socklen_t l = sizeof(client);
 	//注册信号处理器，捕获子进程退出信号
 	/*if(signal(SIGCHLD,handler)==SIG_ERR)
@@ -119,10 +120,8 @@ int main()
 			{
 				if((events[i].events&EPOLLIN)&&events[i].data.fd>0)
 				{
-					//cout<<3<<endl;
 					confd=events[i].data.fd;
 					handle_request(confd);
-					//cout<<4<<endl;
 					//pool_add(handle_request,confd);
 					epoll_ctl(efd,EPOLL_CTL_DEL,confd,&event);
 				}

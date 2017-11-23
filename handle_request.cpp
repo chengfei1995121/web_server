@@ -17,8 +17,6 @@ void handle_request(int n)
 	H.fd=n;
 	H.hd=(char *)malloc(ONEMAX);
 	read_header(&H);
-	//int l = read(n,H.hd, ONEMAX);
-	//H.hd[l] = '\0';
 	cout << H.hd << endl;//打印请求头
 	getfileuri(&H);//获取文件路径
 	//假如文件不存在，返回错误 stat函数用于读取文件信息
@@ -38,7 +36,6 @@ void handle_request(int n)
 	}	
 	if(strstr(H.uri,".php"))
 	{
-		//cout<<1<<endl;
 		respond_php(&H);
 	}
 	else 

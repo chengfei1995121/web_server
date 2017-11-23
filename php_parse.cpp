@@ -11,6 +11,7 @@ char params[10][100]={
 	{"CONTENT_LENGTH"},
 	{"CONTENT_TYPE"}
 };
+//生成请求头
 FCGI_Header makerequestheader(int type,int requestId,int contentLength,int paddingLength)
 {
 	FCGI_Header header;
@@ -24,6 +25,7 @@ FCGI_Header makerequestheader(int type,int requestId,int contentLength,int paddi
 	header.reserved=0;
 	return header;
 }
+//生成开始请求体
 FCGI_BeginRequestBody makebeginbody(int role)
 {
 	FCGI_BeginRequestBody body;
@@ -33,6 +35,7 @@ FCGI_BeginRequestBody makebeginbody(int role)
 	memset(body.reserved,0,sizeof(body.reserved));
 	return body;
 }
+//发送开始请求
 FCGI_BeginRequestRecord makebeginrecord(int REQUEST_ID)
 {
 	FCGI_BeginRequestRecord beginrecord;
@@ -40,6 +43,7 @@ FCGI_BeginRequestRecord makebeginrecord(int REQUEST_ID)
 	beginrecord.body=makebeginbody(FCGI_RESPONDER);
 	return beginrecord;
 }
+//生存键值对
 bool makeNameValueBody(char *name,int nameLen,char *value,int valueLen,unsigned char *bodyptr,int *bodylenptr)
 {
 	unsigned char *start=bodyptr;
@@ -76,6 +80,7 @@ bool makeNameValueBody(char *name,int nameLen,char *value,int valueLen,unsigned 
 	*bodylenptr=bodyptr-start;
 	return true;
 }
+//发送环境变量,GET数据通过此方式发送
 void sendparme(int fd,int id,char *name,char *value)
 {
 	FCGI_Header header;
@@ -91,6 +96,7 @@ void sendparme(int fd,int id,char *name,char *value)
 	printf("\n %d %s\n",m,buff);
 	return;
 }
+//POST通过此方式发送
 void sendstdin(int fd,int id,char *Stdin)
 {
 	FCGI_Header header;
@@ -181,7 +187,7 @@ int open_listent()
 	fd=socket(AF_INET,SOCK_STREAM,0);
 	if(fd<0)
 	{
-		printf("socket error");
+		printf("php socket error");
 		exit(-1);
 	}
 	serveraddr.sin_family=AF_INET;
@@ -248,7 +254,8 @@ else
 	printf("类型 %d\n",header.type);
 	if(n>0)
 	{
-		if(header.type==6){
+		if(header.type==6)
+		{
 		int conlen=(header.contentLengthB1>>8)+header.contentLengthB0;
 		printf("获取内容的长度 %d\n",conlen);
 		int m=read(fd,context,1000);

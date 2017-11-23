@@ -1,12 +1,13 @@
 <?php
-	$conn=mysql_connect("localhost","root","As199165&");
-	$c=mysql_select_db("cf",$conn);
-	if($c>0)
-	{
-		echo "yes";
-	}
-	else 
+	$conn=new mysqli("127.0.0.1","root","As199165&","cf");
+	if($conn->connect_errno)
 	{
 		echo "no";
 	}
+	else 
+	{
+		echo "yes";
+	}
+
+	$conn->close();
 ?>
