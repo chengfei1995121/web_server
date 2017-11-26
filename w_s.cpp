@@ -7,6 +7,7 @@
 #include "handle_request.h"
 #include "threadpool.h"
 #include<sys/epoll.h>
+#include "Socket.h"
 using namespace std;
 #define MAXEVENT 100000
 //static Thread_pool *pool=NULL;

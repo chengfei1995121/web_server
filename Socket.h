@@ -4,9 +4,12 @@
 #include<string>
 class Socket{
 	public:
+		Socket()=default;
 		Socket(const char *ip,const int port);
 		Socket(const int port);
 		int Socket_open();
+		void Socket_close();
+		void printf_fd();
 	private:
 		struct sockaddr_in server_addr;
 		struct sockaddr_in client_addr;

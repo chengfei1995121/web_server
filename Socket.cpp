@@ -33,3 +33,11 @@ int Socket::Socket_open()
 	}
 	return 1;
 }
+void Socket::Socket_close()
+{
+	close(socketfd);
+}
+void Socket::printf_fd()
+{
+	cout<<"socketfd:"<<socketfd<<endl;
+}
