@@ -35,7 +35,7 @@ FCGI_BeginRequestBody makebeginbody(int role)
 	memset(body.reserved,0,sizeof(body.reserved));
 	return body;
 }
-//发送开始请求
+//开始请求
 FCGI_BeginRequestRecord makebeginrecord(int REQUEST_ID)
 {
 	FCGI_BeginRequestRecord beginrecord;
@@ -43,7 +43,7 @@ FCGI_BeginRequestRecord makebeginrecord(int REQUEST_ID)
 	beginrecord.body=makebeginbody(FCGI_RESPONDER);
 	return beginrecord;
 }
-//生存键值对
+//生存发送环境变量的内容体,格式为名字长度 值长度 名字  值
 bool makeNameValueBody(char *name,int nameLen,char *value,int valueLen,unsigned char *bodyptr,int *bodylenptr)
 {
 	unsigned char *start=bodyptr;
@@ -85,8 +85,8 @@ void sendparme(int fd,int id,char *name,char *value)
 {
 	FCGI_Header header;
 	char request[1000];
-	int bufflen=0;
-	unsigned char buff[1000];
+	int bufflen=0;//内容的长度
+	unsigned char buff[1000];//环境变量内容
 	bzero(buff,sizeof(buff));
 	makeNameValueBody(name,strlen(name),value,strlen(value),buff,&bufflen);
 	header=makerequestheader(FCGI_PARAMS,id,bufflen,0);

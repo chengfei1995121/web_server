@@ -121,8 +121,8 @@ int main()
 				if((events[i].events&EPOLLIN)&&events[i].data.fd>0)
 				{
 					confd=events[i].data.fd;
-					handle_request(confd);
-					//pool_add(handle_request,confd);
+					//handle_request(confd);
+					pool_add(handle_request,confd);
 					epoll_ctl(efd,EPOLL_CTL_DEL,confd,&event);
 				}
 			
