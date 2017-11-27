@@ -75,7 +75,7 @@ void add_pool(int confd,struct cf *pool)
 	no_block(socketd);
 	socklen_t l = sizeof(client);
 	//注册信号处理器，捕获子进程退出信号
-	/*if(signal(SIGCHLD,handler)==SIG_ERR)
+	*if(signal(SIGCHLD,handler)==SIG_ERR)
 	{
 		printf("signal() failed\n");
 		return -1;
@@ -101,7 +101,7 @@ void add_pool(int confd,struct cf *pool)
 	while (1) {
 
 
-		/***I/O多路复用 epoll***/
+		***I/O多路复用 epoll***/
 	/*	int num=epoll_wait(efd,events,MAXEVENT,-1);
 		for(int i=0;i<num;i++)
 		{
@@ -132,7 +132,7 @@ void add_pool(int confd,struct cf *pool)
 		}
 
 
-		/***end***/
+		***end***/
 		/***I/O多路复用并发 select***/
 		/*int confd;
 		pool.ready_set=pool.read_set;
@@ -175,11 +175,23 @@ void add_pool(int confd,struct cf *pool)
 */
 int main()
 {
+	struct sigaction sa;
+    memset(&sa, '\0', sizeof(sa));
+    sa.sa_handler = SIG_IGN;
+    sa.sa_flags = 0;
+    if (sigaction(SIGPIPE, &sa, NULL)) {
+        cout<<"install sigal handler for SIGPIPE failed"<<endl;
+	}
+	pool_init(10);
 	Socket first("127.0.0.1",8888);
-	first.Socket_open();
-	Epoll second(100);
+	first.no_block();
+	if(first.Socket_open()<0)
+	{
+		exit(-1);
+	}
+	Epoll second(500000);
 	second.epoll_open();
-	second.epoll_add(first,EPOLLIN);
+	second.epoll_add(first,EPOLLIN,EPOLLET);
 	second.epoll_listen(first);
 	second.epoll_close();
 	first.Socket_close();

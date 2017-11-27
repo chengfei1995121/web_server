@@ -44,7 +44,7 @@ void respond_body(struct request_header *RH)
 	//文件映射
 	int stcd=open(RH->uri,O_RDONLY,0);
 	if(stcd<0)
-		cout<<"open"<<endl;
+		cout<<"open mmap failed"<<endl;
 	char *srcp;
 	int w,nwrite=0;
 	srcp=static_cast<char*>(mmap(0,RH->filesize,PROT_READ,MAP_PRIVATE,stcd,0));
@@ -57,7 +57,7 @@ void respond_body(struct request_header *RH)
 				continue;
 			else
 			{
-				cout<<"write"<<endl;
+				cout<<"respond write faile"<<endl;
 				break;
 			}
 		}

@@ -37,6 +37,14 @@ void Socket::Socket_close()
 {
 	close(socketfd);
 }
+void Socket::no_block()
+{
+	if(fcntl(socketfd,F_SETFL,O_NONBLOCK)<0)
+	{
+		cout<<"fcntl fail"<<endl;
+		exit(-1);
+	}
+}
 void Socket::printf_fd()
 {
 	cout<<"socketfd:"<<socketfd<<endl;

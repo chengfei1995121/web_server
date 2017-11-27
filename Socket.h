@@ -10,6 +10,7 @@ class Socket{
 		int Socket_open();
 		void Socket_close();
 		void printf_fd();
+		void no_block();
 	private:
 		struct sockaddr_in server_addr;
 		struct sockaddr_in client_addr;

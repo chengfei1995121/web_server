@@ -1,6 +1,7 @@
 #include "http.h"
 #include "Epoll.h"
 #include "handle_request.h"
+#include "threadpool.h"
 using namespace std;
 Epoll::Epoll(int max):maxevent(max){}
 void Epoll::epoll_open()
@@ -53,7 +54,7 @@ void Epoll::epoll_listen(const Socket &Sk)
 			{
 				confd=accept(Sk.socketfd,(struct sockaddr*)&Sk.client_addr,&l);
 				event.data.fd=confd;
-				event.events=EPOLLIN | EPOLLET;
+				event.events=EPOLLIN | EPOLLET | EPOLLONESHOT;
 				if(epoll_ctl(efd,EPOLL_CTL_ADD,confd,&event)<0)
 				{
 					cout<<"ctl error"<<endl;
@@ -66,9 +67,8 @@ void Epoll::epoll_listen(const Socket &Sk)
 				if((events[i].events&EPOLLIN)&&events[i].data.fd>0)
 				{
 					confd=events[i].data.fd;
-					handle_request(confd);
-					//pool_add(handle_request,confd);
-					epoll_ctl(efd,EPOLL_CTL_DEL,confd,&event);
+					//handle_request(confd);
+					pool_add(handle_request,confd);
 				}
 			
 			}
