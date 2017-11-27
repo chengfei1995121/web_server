@@ -4,7 +4,7 @@
 #include<string>
 class Socket{
 	public:
-		Socket()=default;
+		friend class Epoll;
 		Socket(const char *ip,const int port);
 		Socket(const int port);
 		int Socket_open();

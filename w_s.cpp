@@ -6,8 +6,8 @@
 #include "http.h"
 #include "handle_request.h"
 #include "threadpool.h"
-#include<sys/epoll.h>
 #include "Socket.h"
+#include "Epoll.h"
 using namespace std;
 #define MAXEVENT 100000
 //static Thread_pool *pool=NULL;
@@ -49,7 +49,7 @@ void add_pool(int confd,struct cf *pool)
 		}
 	}
 }*/
-int main()
+/*int main()
 {
 	struct sockaddr_in client, server;
 	int socketd,confd;
@@ -81,7 +81,7 @@ int main()
 		return -1;
 	}*/
 	//init(socketd,&pool);select池初始化
-	int efd;
+	/*int efd;
 	struct epoll_event event;
 	struct epoll_event *events;
 	no_block(socketd);
@@ -102,7 +102,7 @@ int main()
 
 
 		/***I/O多路复用 epoll***/
-		int num=epoll_wait(efd,events,MAXEVENT,-1);
+	/*	int num=epoll_wait(efd,events,MAXEVENT,-1);
 		for(int i=0;i<num;i++)
 		{
 			if(socketd==events[i].data.fd)
@@ -167,9 +167,20 @@ int main()
 		}
 		close(n);*/
 		/****end*/
-	}
+/*	}
 	free(events);
 	close(efd);
 	close(socketd);
 }
-
+*/
+int main()
+{
+	Socket first("127.0.0.1",8888);
+	first.Socket_open();
+	Epoll second(100);
+	second.epoll_open();
+	second.epoll_add(first,EPOLLIN);
+	second.epoll_listen(first);
+	second.epoll_close();
+	first.Socket_close();
+}
