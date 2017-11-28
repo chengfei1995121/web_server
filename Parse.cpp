@@ -44,41 +44,39 @@ void Parse::handle_request()
 	cout << hd << endl;//打印请求头
 	getfileuri();//获取文件路
 	cout<<"uri:"<<uri<<endl;
-	get_request_method(&H);
-	get_type(&H);
-	if(strstr(H.method,"POST"))
+	get_request_method();
+	get_type();
+	if(strstr(method,"POST"))
 	{
-		get_postdata(&H);
-		get_content_length_and_type(&H);
+		get_postdata();
+		get_content_length_and_type();
 	}
 	//假如文件不存在，返回错误 stat函数用于读取文件信息
 
-	if(stat(H.uri,&sbuf)<0)	
+	if(stat(uri,&sbuf)<0)	
 	{
-		clienterror(H.fd);
-		close(n);
+		clienterror(fd);
+		close(fd);
 		return;
 	}	
-	if(strstr(H.uri,".php"))
+	if(strstr(uri,".php"))
 	{
-		respond_php(&H);
+		//respond_php(&H);
 	}
 	else 
 	{
-	if(!strcmp("GET",H.method))
+	if(!strcmp("GET",method))
 	{
-	H.filesize=sbuf.st_size;
-	respond_static_html(&H);
+	filesize=sbuf.st_size;
+	respond_static_html();
 	}
 	}
-	free(H.hd);
-	close(n);
 }
 //响应静态内容
-void respond_static_html(struct request_header *H)
+void Parse::respond_static_html()
 {
-	respond_header(H);
-	respond_body(H);
+	respond_header(*this);
+	respond_body(*this);
 }
 //响应动态内容
 void respond_php(struct request_header *H)
@@ -86,9 +84,9 @@ void respond_php(struct request_header *H)
 		char context[10000];
 		memset(context,0,sizeof(context));
 		handle_dynamic(H,context);
-		H->filesize=strlen(context);
-		respond_header(H);
-		write(H->fd,context,strlen(context));
+	//	H->filesize=strlen(context);
+	//	respond_header(H);
+	//	write(H->fd,context,strlen(context));
 }
 void Parse::read_header()
 {
@@ -177,4 +175,78 @@ void Parse::get_getdata(int start)
 	}
 	getdata[k]='\0';
 	cout<<"get数据"<<getdata<<endl;
+}
+void Parse::get_request_method()
+{
+	size_t i;
+	for(i=0;i<strlen(hd);i++)
+	{
+		if(hd[i]==' ')
+			break;
+		method[i]=hd[i];
+	}
+	method[i]='\0';
+}
+void Parse::get_postdata()
+{
+	int len=strlen(hd);
+	int k=0;
+	for(int i=len-1;i>=0;i--)
+	{
+		if(hd[i]=='\n')
+		{
+			for(int j=i+1;j<len;j++)
+			{
+				post[k]=hd[j];
+				k++;
+			}
+			break;
+		}
+	}
+	post[k]='\0';
+	cout<<"POST"<<post<<endl;
+}
+void Parse::get_content_length_and_type()
+{
+	int k=0,kk=0;
+	for(size_t i=0;i<strlen(hd);i++)
+	{
+		if(hd[i]==':')
+		{
+			if(hd[i-1]=='h')
+			{
+				for(int j=i+1;hd[j]!='\r';j++)
+				{
+					if(hd[j]==' ')
+						continue;
+					content_length[k]=hd[j];
+					k++;
+				}
+				content_length[k]='\0';
+			}
+			else 
+			{
+				if(hd[i-1]=='e')
+				{
+					for(int j=i+1;hd[j]!='\r';j++)
+					{	if(hd[j]==' ')
+							continue;
+						content_type[kk]=hd[j];
+						kk++;
+					}
+
+				content_type[kk]='\0';
+				break;
+				}
+				
+			}
+		}
+	}
+//	cout<<"content_length"<<RH->content_length<<endl;
+//	cout<<"content_type"<<RH->content_type<<endl;
+}
+void Parse::Close()
+{
+	free(hd);
+	close(fd);
 }

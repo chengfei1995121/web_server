@@ -30,26 +30,26 @@ void respond(struct request_header *RH)
 	cout << "slen:" << slen << endl;*/
 }
 //返回头部消息
-void respond_header(struct request_header *RH)
+void respond_header(const Parse &p)
 {
 //	cout<<"content_type"<<RH->filetype<<"  filesize"<<RH->filesize<<endl;
 	char buf[B_SIZE]="http/1.0 200 ok\r\nAccept-Ranges:bytes\r\nServer:cf web server\r\nContent-type:";
-	sprintf(buf,"%s%s\r\nContent-length:%d\r\n\r\n",buf,RH->filetype,RH->filesize);
+	sprintf(buf,"%s%s\r\nContent-length:%d\r\n\r\n",buf,p.filetype,p.filesize);
 	//strcat(buf,"Connection:close\r\n\r\n");
-	write(RH->fd,buf,strlen(buf));
+	write(p.fd,buf,strlen(buf));
 }
 //返回主体内容
-void respond_body(struct request_header *RH)
+void respond_body(const Parse &p)
 {
 	//文件映射
-	int stcd=open(RH->uri,O_RDONLY,0);
+	int stcd=open(p.uri,O_RDONLY,0);
 	if(stcd<0)
 		cout<<"open mmap failed"<<endl;
 	char *srcp;
 	int w,nwrite=0;
-	srcp=static_cast<char*>(mmap(0,RH->filesize,PROT_READ,MAP_PRIVATE,stcd,0));
+	srcp=static_cast<char*>(mmap(0,p.filesize,PROT_READ,MAP_PRIVATE,stcd,0));
 	close(stcd);
-	while((w=write(RH->fd,srcp+nwrite,RH->filesize))!=0)
+	while((w=write(p.fd,srcp+nwrite,p.filesize))!=0)
 	{
 		if(w==-1)
 		{
@@ -62,8 +62,8 @@ void respond_body(struct request_header *RH)
 			}
 		}
 		nwrite+=w;
-		if(nwrite==RH->filesize)
+		if(nwrite==p.filesize)
 			break;
 	}
-	munmap(srcp,RH->filesize);
+	munmap(srcp,p.filesize);
 }

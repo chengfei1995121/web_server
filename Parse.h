@@ -3,12 +3,19 @@
 #define H_SIZE 1024
 class Parse{
 	public:
+		friend void respond_body(const Parse&);
+		friend void respond_header(const Parse&);
 		Parse(int n);
 		void read_header();
 		int getfileuri();
 		void get_type();
 		void get_getdata(int);
+		void get_request_method();
+		void  get_postdata();
+		void get_content_length_and_type();
+		void respond_static_html();
 		void handle_request();
+		void Close();
 	private:
 	char *hd;//请求头内容
 	char method[H_SIZE];//请求类型
