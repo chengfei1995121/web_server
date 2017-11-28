@@ -67,8 +67,8 @@ void Epoll::epoll_listen(const Socket &Sk)
 				if((events[i].events&EPOLLIN)&&events[i].data.fd>0)
 				{
 					confd=events[i].data.fd;
-					//handle_request(confd);
-					pool_add(handle_request,confd);
+					handle_request(confd);
+					//pool_add(handle_request,confd);
 				}
 			
 			}

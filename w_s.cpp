@@ -189,9 +189,9 @@ int main()
 	{
 		exit(-1);
 	}
-	Epoll second(500000);
+	Epoll second(50000);
 	second.epoll_open();
-	second.epoll_add(first,EPOLLIN,EPOLLET);
+	second.epoll_add(first,EPOLLIN);
 	second.epoll_listen(first);
 	second.epoll_close();
 	first.Socket_close();
