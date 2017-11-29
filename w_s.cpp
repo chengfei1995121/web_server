@@ -181,13 +181,13 @@ int main()
     if (sigaction(SIGPIPE, &sa, NULL)) {
         cout<<"install sigal handler for SIGPIPE failed"<<endl;
 	}*/
-//	pool_init(10);
+	pool_init(100);
 	Socket first("127.0.0.1",8888);
 	if(first.Socket_open()<0)
 	{
 		exit(-1);
 	}
-	first.no_block();
+	//first.no_block();
 	Epoll second(50000);
 	second.epoll_open();
 	second.epoll_add(first,EPOLLIN);

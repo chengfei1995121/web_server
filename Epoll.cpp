@@ -69,9 +69,9 @@ void Epoll::epoll_listen(const Socket &Sk)
 				if((events[i].events&EPOLLIN)&&events[i].data.fd>0)
 				{
 					confd=events[i].data.fd;
-					Parse P(confd);
-					P.handle_request();
-					//pool_add(handle_request,confd);
+					//Parse P(confd);
+					//P.handle_request();
+					pool_add(middle,confd);
 					event.data.fd=confd;
 					event.events=EPOLLOUT;
 					epoll_ctl(efd,EPOLL_CTL_DEL,confd,&event);
@@ -98,4 +98,9 @@ int no_block(int fd)
 	}
 	else 
 		return 1;
+}
+void middle(int fd)
+{
+	Parse P(fd);
+	P.handle_request();	
 }
