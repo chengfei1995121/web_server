@@ -40,10 +40,11 @@ Parse::Parse(int n):fd(n){
 void Parse::handle_request()
 {
 	struct stat sbuf;
+	//no_block();
 	read_header();
-	cout << hd << endl;//打印请求头
 	getfileuri();//获取文件路
 	cout<<"uri:"<<uri<<endl;
+	cout<<"fd"<<fd<<endl;
 	get_request_method();
 	get_type();
 	if(strstr(method,"POST"))
@@ -71,6 +72,7 @@ void Parse::handle_request()
 	respond_static_html();
 	}
 	}
+	Close();
 }
 //响应静态内容
 void Parse::respond_static_html()
@@ -79,11 +81,11 @@ void Parse::respond_static_html()
 	respond_body(*this);
 }
 //响应动态内容
-void respond_php(struct request_header *H)
+void respond_php()
 {
 		char context[10000];
 		memset(context,0,sizeof(context));
-		handle_dynamic(H,context);
+		//handle_dynamic(H,context);
 	//	H->filesize=strlen(context);
 	//	respond_header(H);
 	//	write(H->fd,context,strlen(context));
@@ -110,10 +112,12 @@ void Parse::read_header()
 			break;
 	}
 	hd[nread]='\0';
+	cout<<"头部"<<hd<<endl;
+	cout<<"大小"<<nread;
 	return;
 }
 //非阻塞I/O
-int no_block(int fd)
+int Parse::no_block()
 {
 	int s=fcntl(fd,F_SETFL,O_NONBLOCK);
 	if(s<0)

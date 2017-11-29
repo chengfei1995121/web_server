@@ -3,8 +3,8 @@
 #define H_SIZE 1024
 class Parse{
 	public:
-		friend void respond_body(const Parse&);
-		friend void respond_header(const Parse&);
+		friend void respond_body(const Parse);
+		friend void respond_header(const Parse);
 		Parse(int n);
 		void read_header();
 		int getfileuri();
@@ -15,6 +15,7 @@ class Parse{
 		void get_content_length_and_type();
 		void respond_static_html();
 		void handle_request();
+		int no_block();
 		void Close();
 	private:
 	char *hd;//请求头内容
@@ -28,9 +29,5 @@ class Parse{
 	char content_length[16];
 	char content_type[H_SIZE];
 };
-void handle_request(int n);
-void read_header(struct request_header *);
-void respond_php(struct request_header *);
-void respond_static_html(struct request_header *);
 int no_block(int fd);
 #endif

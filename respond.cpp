@@ -1,11 +1,10 @@
 #include "http.h"
 #include "respond.h"
 #include "handle_file.h"
-#include "handle_request.h"
 #include<errno.h>
 #define B_SIZE 10000
 using namespace std;
-void respond(struct request_header *RH)
+void respond()
 {
 	//cout<<"1:"<<filesize<<endl;
 	//char type[1000];
@@ -21,8 +20,8 @@ void respond(struct request_header *RH)
 	cout <<"2:"<< strlen(a) << endl;
 	*/
 	//cout<<"uri:"<<RH->uri<<endl;
-	respond_header(RH);
-	respond_body(RH);
+//	respond_header(RH);
+//	respond_body(RH);
 
 	//slen=send(n,a,chang,0);
 	//cout << "sizeof:" << chang << endl;
@@ -30,7 +29,7 @@ void respond(struct request_header *RH)
 	cout << "slen:" << slen << endl;*/
 }
 //返回头部消息
-void respond_header(const Parse &p)
+void respond_header(const Parse p)
 {
 //	cout<<"content_type"<<RH->filetype<<"  filesize"<<RH->filesize<<endl;
 	char buf[B_SIZE]="http/1.0 200 ok\r\nAccept-Ranges:bytes\r\nServer:cf web server\r\nContent-type:";
@@ -39,7 +38,7 @@ void respond_header(const Parse &p)
 	write(p.fd,buf,strlen(buf));
 }
 //返回主体内容
-void respond_body(const Parse &p)
+void respond_body(const Parse p)
 {
 	//文件映射
 	int stcd=open(p.uri,O_RDONLY,0);

@@ -1,6 +1,6 @@
 #include "http.h"
 #include "Epoll.h"
-#include "handle_request.h"
+#include "Parse.h"
 #include "threadpool.h"
 using namespace std;
 Epoll::Epoll(int max):maxevent(max){}
@@ -53,6 +53,8 @@ void Epoll::epoll_listen(const Socket &Sk)
 			if(Sk.socketfd==events[i].data.fd)
 			{
 				confd=accept(Sk.socketfd,(struct sockaddr*)&Sk.client_addr,&l);
+				cout<<"confd "<<confd<<endl;
+				no_block(confd);
 				event.data.fd=confd;
 				event.events=EPOLLIN | EPOLLET | EPOLLONESHOT;
 				if(epoll_ctl(efd,EPOLL_CTL_ADD,confd,&event)<0)
@@ -67,8 +69,12 @@ void Epoll::epoll_listen(const Socket &Sk)
 				if((events[i].events&EPOLLIN)&&events[i].data.fd>0)
 				{
 					confd=events[i].data.fd;
-					handle_request(confd);
+					Parse P(confd);
+					P.handle_request();
 					//pool_add(handle_request,confd);
+					event.data.fd=confd;
+					event.events=EPOLLOUT;
+					epoll_ctl(efd,EPOLL_CTL_DEL,confd,&event);
 				}
 			
 			}
@@ -80,4 +86,16 @@ void Epoll::epoll_close()
 {
 	delete []events;
 	close(efd);
+}
+int no_block(int fd)
+{
+
+	int s=fcntl(fd,F_SETFL,O_NONBLOCK);
+	if(s<0)
+	{
+		cout<<"fetcl"<<endl;
+		return -1;
+	}
+	else 
+		return 1;
 }

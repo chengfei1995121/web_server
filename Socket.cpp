@@ -41,6 +41,7 @@ void Socket::no_block()
 {
 	if(fcntl(socketfd,F_SETFL,O_NONBLOCK)<0)
 	{
+		cout<<socketfd<<endl;
 		cout<<"fcntl fail"<<endl;
 		exit(-1);
 	}

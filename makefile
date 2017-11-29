@@ -1,10 +1,10 @@
 c=g++ -std=c++11
-web_server:handle_request.o error.o handle_file.o respond.o w_s.o threadpool.o php_parse.o Socket.o Epoll.o
-	g++ -o web_server threadpool.o handle_request.o error.o handle_file.o respond.o w_s.o php_parse.o Socket.o Epoll.o -l pthread
+web_server:Parse.o error.o respond.o w_s.o threadpool.o Socket.o Epoll.o
+	g++ -o web_server threadpool.o Parse.o error.o respond.o w_s.o Socket.o Epoll.o -l pthread
 threadpool.o:threadpool.cpp 
 	g++ -c threadpool.cpp
-handle_request.o:handle_request.cpp
-	g++ -c handle_request.cpp 
+Parse.o:Parse.cpp
+	g++ -c Parse.cpp 
 error.o:error.cpp 
 	g++ -c error.cpp 
 handle_file.o:handle_file.cpp 

@@ -4,7 +4,6 @@
 	Date:2017/10
 ***/
 #include "http.h"
-#include "handle_request.h"
 #include "threadpool.h"
 #include "Socket.h"
 #include "Epoll.h"
@@ -175,20 +174,20 @@ void add_pool(int confd,struct cf *pool)
 */
 int main()
 {
-	struct sigaction sa;
+/*	struct sigaction sa;
     memset(&sa, '\0', sizeof(sa));
     sa.sa_handler = SIG_IGN;
     sa.sa_flags = 0;
     if (sigaction(SIGPIPE, &sa, NULL)) {
         cout<<"install sigal handler for SIGPIPE failed"<<endl;
-	}
-	pool_init(10);
+	}*/
+//	pool_init(10);
 	Socket first("127.0.0.1",8888);
-	first.no_block();
 	if(first.Socket_open()<0)
 	{
 		exit(-1);
 	}
+	first.no_block();
 	Epoll second(50000);
 	second.epoll_open();
 	second.epoll_add(first,EPOLLIN);
