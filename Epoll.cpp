@@ -2,6 +2,7 @@
 #include "Epoll.h"
 #include "Parse.h"
 #include "threadpool.h"
+#include "tool.h"
 using namespace std;
 Epoll::Epoll(int max):maxevent(max){}
 void Epoll::epoll_open()
@@ -54,7 +55,7 @@ void Epoll::epoll_listen(const Socket &Sk)
 			{
 				confd=accept(Sk.socketfd,(struct sockaddr*)&Sk.client_addr,&l);
 				cout<<"confd "<<confd<<endl;
-				no_block(confd);
+				set_nonblocking(confd);
 				event.data.fd=confd;
 				event.events=EPOLLIN | EPOLLET | EPOLLONESHOT;
 				if(epoll_ctl(efd,EPOLL_CTL_ADD,confd,&event)<0)
@@ -86,18 +87,6 @@ void Epoll::epoll_close()
 {
 	delete []events;
 	close(efd);
-}
-int no_block(int fd)
-{
-
-	int s=fcntl(fd,F_SETFL,O_NONBLOCK);
-	if(s<0)
-	{
-		cout<<"fetcl"<<endl;
-		return -1;
-	}
-	else 
-		return 1;
 }
 void middle(int fd)
 {

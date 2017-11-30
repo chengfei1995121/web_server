@@ -5,6 +5,7 @@ class Parse{
 	public:
 		friend void respond_body(const Parse);
 		friend void respond_header(const Parse);
+		friend void handle_dynamic(Parse*,char*);
 		Parse(int n);
 		void read_header();
 		int getfileuri();
@@ -15,6 +16,7 @@ class Parse{
 		void get_content_length_and_type();
 		void respond_static_html();
 		void handle_request();
+		void respond_php();
 		int no_block();
 		void Close();
 	private:

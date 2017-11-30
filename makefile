@@ -1,6 +1,6 @@
 c=g++ -std=c++11
-web_server:Parse.o error.o respond.o w_s.o threadpool.o Socket.o Epoll.o
-	g++ -o web_server threadpool.o Parse.o error.o respond.o w_s.o Socket.o Epoll.o -l pthread
+web_server:Parse.o error.o respond.o php_parse.o w_s.o threadpool.o Socket.o Epoll.o tool.o
+	g++ -o web_server threadpool.o Parse.o error.o php_parse.o respond.o w_s.o Socket.o Epoll.o tool.o -l pthread
 threadpool.o:threadpool.cpp 
 	g++ -c threadpool.cpp
 Parse.o:Parse.cpp
@@ -19,5 +19,7 @@ Socket.o:Socket.cpp Socket.h
 	gcc -c Socket.cpp
 Epoll.o:Epoll.cpp Epoll.h 
 	gcc -c Epoll.cpp
+tool.o:tool.cpp tool.h
+	gcc -c tool.cpp
 clean:
 	rm -rf *.o

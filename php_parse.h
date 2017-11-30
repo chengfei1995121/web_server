@@ -1,6 +1,7 @@
 #ifndef __FCGI__
 #define __FCGI__
 #include "http.h"
+#include "Parse.h"
 #define REQUEST_HEADER_LEN 8
 
 #define FCGI_VERSION 1
@@ -58,5 +59,5 @@ void sendparme(int,int,char*,char*);
 void makeendrequest(int,int,int);
 void pritf_html(char *context);
 int open_listent();
-void handle_dynamic(struct request_header*,char*);
+void handle_dynamic(Parse *,char*);
 #endif

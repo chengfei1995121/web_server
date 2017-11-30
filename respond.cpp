@@ -1,7 +1,7 @@
 #include "http.h"
-#include "respond.h"
 #include "handle_file.h"
 #include<errno.h>
+#include"Respond.h"
 #define B_SIZE 10000
 using namespace std;
 void respond()
@@ -56,8 +56,16 @@ void respond_body(const Parse p)
 				continue;
 			else
 			{
+				if(errno==EAGAIN)
+				{
+					cout<<"没有空间"<<endl;
+					continue;
+				}
+				else
+				{
 				cout<<"respond write faile"<<endl;
 				break;
+				}
 			}
 		}
 		nwrite+=w;

@@ -1,10 +1,11 @@
 #include "http.h"
 #include "error.h"
-#include "respond.h"
+#include "Respond.h"
 #include "handle_file.h"
 #include<errno.h>
 #include "php_parse.h"
 #include "Parse.h"
+#include "tool.h"
 #define MAXSIZE 100000
 #define ONEMAX 1024*1024
 using namespace std;
@@ -41,7 +42,7 @@ void Parse::handle_request()
 {
 	struct stat sbuf;
 	//no_block();
-	read_header();
+	read_n(fd,hd);
 	getfileuri();//获取文件路
 	cout<<"uri:"<<uri<<endl;
 	cout<<"fd"<<fd<<endl;
@@ -62,7 +63,7 @@ void Parse::handle_request()
 	}	
 	if(strstr(uri,".php"))
 	{
-		//respond_php(&H);
+		respond_php();
 	}
 	else 
 	{
@@ -72,6 +73,7 @@ void Parse::handle_request()
 	respond_static_html();
 	}
 	}
+//	free(hd);
 	Close();
 }
 //响应静态内容
@@ -81,14 +83,14 @@ void Parse::respond_static_html()
 	respond_body(*this);
 }
 //响应动态内容
-void respond_php()
+void Parse::respond_php()
 {
 		char context[10000];
 		memset(context,0,sizeof(context));
-		//handle_dynamic(H,context);
-	//	H->filesize=strlen(context);
-	//	respond_header(H);
-	//	write(H->fd,context,strlen(context));
+		handle_dynamic(this,context);
+		filesize=strlen(context);
+		respond_header(*this);
+		write(fd,context,strlen(context));
 }
 void Parse::read_header()
 {
@@ -106,14 +108,13 @@ void Parse::read_header()
 		}
 		else if(l==-1&&errno==EINTR)
 		{
+			cout<<"等待"<<endl;
 			continue;
 		}
 		else 
 			break;
 	}
 	hd[nread]='\0';
-	cout<<"头部"<<hd<<endl;
-	cout<<"大小"<<nread;
 	return;
 }
 //非阻塞I/O
@@ -133,7 +134,7 @@ int Parse::getfileuri()
 //	strcat(RH->uri,"./test/web-page");
 //	int k =15;
 	memset(uri,0,sizeof(uri));
-	strcat(uri,"/home/chengfei/server/web_server/test");
+	strcat(uri,"./test/web-page");
 	int k=strlen(uri);
 	for (size_t i = 0; i < strlen(hd); i++)
 	{

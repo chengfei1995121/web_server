@@ -1,7 +1,6 @@
 #include "php_parse.h"
 #include<arpa/inet.h>
 #include<malloc.h>
-#include "handle_request.h"
 char params[10][100]={
 	{"SCRIPT_FILENAME"},
 	{"REQUEST_METHOD"},
@@ -209,7 +208,7 @@ void printf_php_error(char *context,char *htmltext)
 {
 	strcpy(htmltext,context);
 }
-void handle_dynamic(struct request_header *H,char *htmltext)
+void handle_dynamic(Parse *H,char *htmltext)
 {
 	int id;
 	int fd=open_listent();
