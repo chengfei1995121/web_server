@@ -2,6 +2,7 @@
 #include "handle_file.h"
 #include<errno.h>
 #include"Respond.h"
+#include "tool.h"
 #define B_SIZE 10000
 using namespace std;
 void respond()
@@ -45,32 +46,8 @@ void respond_body(const Parse p)
 	if(stcd<0)
 		cout<<"open mmap failed"<<endl;
 	char *srcp;
-	int w,nwrite=0;
 	srcp=static_cast<char*>(mmap(0,p.filesize,PROT_READ,MAP_PRIVATE,stcd,0));
 	close(stcd);
-	while((w=write(p.fd,srcp+nwrite,p.filesize))!=0)
-	{
-		if(w==-1)
-		{
-			if(errno==EINTR)
-				continue;
-			else
-			{
-				if(errno==EAGAIN)
-				{
-					cout<<"没有空间"<<endl;
-					continue;
-				}
-				else
-				{
-				cout<<"respond write faile"<<endl;
-				break;
-				}
-			}
-		}
-		nwrite+=w;
-		if(nwrite==p.filesize)
-			break;
-	}
+	write_n(p.fd,srcp,p.filesize);
 	munmap(srcp,p.filesize);
 }

@@ -90,32 +90,7 @@ void Parse::respond_php()
 		handle_dynamic(this,context);
 		filesize=strlen(context);
 		respond_header(*this);
-		write(fd,context,strlen(context));
-}
-void Parse::read_header()
-{
-	int l,nread=0;
-	while(1)
-	{
-		l=read(fd,hd+nread,ONEMAX-nread);
-		if(l>0)
-		{
-			nread+=l;
-		}
-		else if(l==0)
-		{
-			break;
-		}
-		else if(l==-1&&errno==EINTR)
-		{
-			cout<<"等待"<<endl;
-			continue;
-		}
-		else 
-			break;
-	}
-	hd[nread]='\0';
-	return;
+		write_n(fd,context,strlen(context));
 }
 //非阻塞I/O
 int Parse::no_block()
@@ -134,7 +109,7 @@ int Parse::getfileuri()
 //	strcat(RH->uri,"./test/web-page");
 //	int k =15;
 	memset(uri,0,sizeof(uri));
-	strcat(uri,"./test/web-page");
+	strcat(uri,"./test");
 	int k=strlen(uri);
 	for (size_t i = 0; i < strlen(hd); i++)
 	{
