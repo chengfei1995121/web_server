@@ -42,7 +42,11 @@ void Parse::handle_request()
 {
 	struct stat sbuf;
 	//no_block();
-	read_n(fd,hd);
+	if(!read_n(fd,hd))
+	{
+		Close();
+		return;
+	}
 	getfileuri();//获取文件路
 	cout<<"uri:"<<uri<<endl;
 	cout<<"fd"<<fd<<endl;
@@ -106,8 +110,6 @@ int Parse::no_block()
 }
 int Parse::getfileuri()
 {
-//	strcat(RH->uri,"./test/web-page");
-//	int k =15;
 	memset(uri,0,sizeof(uri));
 	strcat(uri,"./test");
 	int k=strlen(uri);

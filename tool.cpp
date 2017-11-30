@@ -3,7 +3,7 @@
 #define ONEMAX 10000
 using namespace std;
 
-void read_n(int fd,char *hd)
+int read_n(int fd,char *hd)
 {
 	int l,nread=0;
 	while(1)
@@ -25,9 +25,12 @@ void read_n(int fd,char *hd)
 			break;
 	}
 	hd[nread]='\0';
-	cout<<"头部"<<hd<<endl;
-	cout<<"大小"<<nread;
-	return;
+//	cout<<"头部"<<hd<<endl;
+//	cout<<"大小"<<nread;
+	if(nread==0)
+		return 0;
+	else 
+		return 1;
 }
 void write_n(int fd,char *context,int size)
 {

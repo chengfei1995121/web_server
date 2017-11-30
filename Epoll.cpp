@@ -83,6 +83,11 @@ void Epoll::epoll_listen(const Socket &Sk)
 		}
 	}
 }
+void Epoll::epoll_close()
+{
+	delete []events;
+	close(efd);
+}
 void middle(int fd)
 {
 	Parse P(fd);
