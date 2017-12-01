@@ -12,40 +12,40 @@ using namespace std;
 
 
 struct filetype ft[]={
- {".html", "text/html"},
- {".xml", "text/xml"},
- {".xhtml", "application/xhtml+xml"},
- {".txt", "text/plain"},
- {".rtf", "application/rtf"},
- {".pdf", "application/pdf"},
- {".word", "application/msword"},
- {".png", "image/png"},
- {".gif", "image/gif"},
- {".jpg", "image/jpeg"},
- {".jpeg", "image/jpeg"},
- {".au", "audio/basic"},
- {".mpeg", "video/mpeg"},
- {".mpg", "video/mpeg"},
- {".avi", "video/x-msvideo"},
- {".gz", "application/x-gzip"},
- {".tar", "application/x-tar"},
- {".css", "text/css"},
- {".js","application/javascript"},
- {".php","text/html"},
- {NULL ,NULL}
+	{".html", "text/html"},
+	{".xml", "text/xml"},
+	{".xhtml", "application/xhtml+xml"},
+	{".txt", "text/plain"},
+	{".rtf", "application/rtf"},
+	{".pdf", "application/pdf"},
+	{".word", "application/msword"},
+	{".png", "image/png"},
+	{".gif", "image/gif"},
+	{".jpg", "image/jpeg"},
+	{".jpeg", "image/jpeg"},
+	{".au", "audio/basic"},
+	{".mpeg", "video/mpeg"},
+	{".mpg", "video/mpeg"},
+	{".avi", "video/x-msvideo"},
+	{".gz", "application/x-gzip"},
+	{".tar", "application/x-tar"},
+	{".css", "text/css"},
+	{".js","application/javascript"},
+	{".php","text/html"},
+	{NULL ,NULL}
 };
 
 Parse::Parse(int n):fd(n){
 	hd=(char *)malloc(ONEMAX*sizeof(char));
 }
-void Parse::handle_request()
+int Parse::handle_request()
 {
 	struct stat sbuf;
 	//no_block();
 	if(!read_n(fd,hd))
 	{
-		Close();
-		return;
+		free(hd);
+		return 1;
 	}
 	getfileuri();//获取文件路
 	cout<<"uri:"<<uri<<endl;
@@ -62,8 +62,8 @@ void Parse::handle_request()
 	if(stat(uri,&sbuf)<0)	
 	{
 		clienterror(fd);
-		close(fd);
-		return;
+		Close();
+		return 0;
 	}	
 	if(strstr(uri,".php"))
 	{
@@ -71,14 +71,15 @@ void Parse::handle_request()
 	}
 	else 
 	{
-	if(!strcmp("GET",method))
-	{
-	filesize=sbuf.st_size;
-	respond_static_html();
+		if(!strcmp("GET",method))
+		{
+			filesize=sbuf.st_size;
+			respond_static_html();
+		}
 	}
-	}
-//	free(hd);
+	//	free(hd);
 	Close();
+	return 0;
 }
 //响应静态内容
 void Parse::respond_static_html()
@@ -89,12 +90,12 @@ void Parse::respond_static_html()
 //响应动态内容
 void Parse::respond_php()
 {
-		char context[10000];
-		memset(context,0,sizeof(context));
-		handle_dynamic(this,context);
-		filesize=strlen(context);
-		respond_header(*this);
-		write_n(fd,context,strlen(context));
+	char context[10000];
+	memset(context,0,sizeof(context));
+	handle_dynamic(this,context);
+	filesize=strlen(context);
+	respond_header(*this);
+	write_n(fd,context,strlen(context));
 }
 //非阻塞I/O
 int Parse::no_block()
@@ -212,20 +213,20 @@ void Parse::get_content_length_and_type()
 				{
 					for(int j=i+1;hd[j]!='\r';j++)
 					{	if(hd[j]==' ')
-							continue;
+						continue;
 						content_type[kk]=hd[j];
 						kk++;
 					}
 
-				content_type[kk]='\0';
-				break;
+					content_type[kk]='\0';
+					break;
 				}
-				
+
 			}
 		}
 	}
-//	cout<<"content_length"<<RH->content_length<<endl;
-//	cout<<"content_type"<<RH->content_type<<endl;
+	//	cout<<"content_length"<<RH->content_length<<endl;
+	//	cout<<"content_type"<<RH->content_type<<endl;
 }
 void Parse::Close()
 {

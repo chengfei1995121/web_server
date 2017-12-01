@@ -15,7 +15,7 @@ class Parse{
 		void  get_postdata();
 		void get_content_length_and_type();
 		void respond_static_html();
-		void handle_request();
+		int handle_request();
 		void respond_php();
 		int no_block();
 		void Close();

@@ -21,22 +21,23 @@ int read_n(int fd,char *hd)
 		{
 			continue;
 		}
-		else 
-			break;
+		else
+			if(l==-1&&errno==EAGAIN&&nread==0)
+				return 0;
+			else 
+				break;
 	}
 	hd[nread]='\0';
-//	cout<<"头部"<<hd<<endl;
-//	cout<<"大小"<<nread;
-	if(nread==0)
-		return 0;
-	else 
+	//	cout<<"头部"<<hd<<endl;
+	//	cout<<"大小"<<nread;
+	if(nread>=0)
 		return 1;
 }
 void write_n(int fd,char *context,int size)
 {
 	int nwrite=0;
 	int w;
-while((w=write(fd,context+nwrite,size))!=0)
+	while((w=write(fd,context+nwrite,size))!=0)
 	{
 		if(w==-1)
 		{

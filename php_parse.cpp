@@ -105,57 +105,57 @@ void sendstdin(int fd,int id,char *Stdin)
 	printf("%d %s\n",n,Stdin);
 }
 /*int sendParamsRecord(
-        int fd,
-        char *name,
-        int nlen,
-        char *value,
-        int vlen)
-{
-    unsigned char *buf, *old;
-    int ret, pl,  cl = nlen + vlen;
-    cl = (nlen < 128) ? ++cl : cl + 4; 
-    cl = (vlen < 128) ? ++cl : cl + 4; 
+  int fd,
+  char *name,
+  int nlen,
+  char *value,
+  int vlen)
+  {
+  unsigned char *buf, *old;
+  int ret, pl,  cl = nlen + vlen;
+  cl = (nlen < 128) ? ++cl : cl + 4; 
+  cl = (vlen < 128) ? ++cl : cl + 4; 
 
-    // 计算填充数据长度
-    pl = (cl % 8) == 0 ? 0 : 8 - (cl % 8);
-    old = buf = (unsigned char *)malloc(8 + cl + pl);
+// 计算填充数据长度
+pl = (cl % 8) == 0 ? 0 : 8 - (cl % 8);
+old = buf = (unsigned char *)malloc(8 + cl + pl);
 
-    FCGI_Header nvHeader = makerequestheader(4, 1, cl, pl);
-    memcpy(buf, (char *)&nvHeader, 8);
-    buf = buf + 8;
+FCGI_Header nvHeader = makerequestheader(4, 1, cl, pl);
+memcpy(buf, (char *)&nvHeader, 8);
+buf = buf + 8;
 
-    if (nlen < 128) { // name长度小于128字节，用一个字节保存长度
-        *buf++ = (unsigned char)nlen;
-    } else { // 大于等于128用4个字节保存长度
-        *buf++ = (unsigned char)((nlen >> 24) | 0x80);
-        *buf++ = (unsigned char)(nlen >> 16);
-        *buf++ = (unsigned char)(nlen >> 8);
-        *buf++ = (unsigned char)nlen;
-    }
+if (nlen < 128) { // name长度小于128字节，用一个字节保存长度
+ *buf++ = (unsigned char)nlen;
+ } else { // 大于等于128用4个字节保存长度
+ *buf++ = (unsigned char)((nlen >> 24) | 0x80);
+ *buf++ = (unsigned char)(nlen >> 16);
+ *buf++ = (unsigned char)(nlen >> 8);
+ *buf++ = (unsigned char)nlen;
+ }
 
-    if (vlen < 128) { // value长度小于128字节，用一个字节保存长度
-        *buf++ = (unsigned char)vlen;
-    } else { // 大于等于128用4个字节保存长度
-        *buf++ = (unsigned char)((vlen >> 24) | 0x80);
-        *buf++ = (unsigned char)(vlen >> 16);
-        *buf++ = (unsigned char)(vlen >> 8);
-        *buf++ = (unsigned char)vlen;
-    }
+ if (vlen < 128) { // value长度小于128字节，用一个字节保存长度
+ *buf++ = (unsigned char)vlen;
+ } else { // 大于等于128用4个字节保存长度
+ *buf++ = (unsigned char)((vlen >> 24) | 0x80);
+ *buf++ = (unsigned char)(vlen >> 16);
+ *buf++ = (unsigned char)(vlen >> 8);
+ *buf++ = (unsigned char)vlen;
+ }
 
-    memcpy(buf, name, nlen);
-    buf = buf + nlen;
-    memcpy(buf, value, vlen);
+ memcpy(buf, name, nlen);
+ buf = buf + nlen;
+ memcpy(buf, value, vlen);
 
-    ret = write(fd, old, 8 + cl + pl);
+ ret = write(fd, old, 8 + cl + pl);
 
-    free(old);
+ free(old);
 
-    if (ret == (8 + cl + pl)) {
-        return 0;
-    } else {
-        return -1;
-    }
-}*/
+ if (ret == (8 + cl + pl)) {
+ return 0;
+ } else {
+ return -1;
+ }
+ }*/
 void makeendrequest(int fd,int id,int FCGI)
 {
 	FCGI_Header endrecord;
@@ -195,12 +195,12 @@ int open_listent()
 	int confd=connect(fd,(sockaddr *)&serveraddr,sizeof(serveraddr));
 	if(confd==0)
 	{
-			printf("已连接 %d",confd);
+		printf("已连接 %d",confd);
 	}
 	else 
 	{
-			printf("失败 %d",confd);
-			exit(-1);
+		printf("失败 %d",confd);
+		exit(-1);
 	}
 	return fd;
 }
@@ -226,28 +226,28 @@ void handle_dynamic(Parse *H,char *htmltext)
 	char y[100]={"application/x-www-form-urlencoded"};
 	//strcat(b,uri);
 	if(strstr(H->method,"GET"))
-{	sendparme(fd,id,a,H->uri);
-	sendparme(fd,id,c,d);
-	if(strlen(H->getdata)!=0)
-		sendparme(fd,id,e,H->getdata);
-	makeendrequest(fd,id,FCGI_PARAMS);
-	//std::cout<<3<<std::endl;
-}
-else 
-{
-	if(strstr(H->method,"POST"))
-	{
-		sendparme(fd,id,params[0],H->uri);
-		sendparme(fd,id,params[6],H->content_type);
-		sendparme(fd,id,params[1],params[4]);
-		sendparme(fd,id,params[5],H->content_length);	
-		makeendrequest(fd,id,FCGI_PARAMS);	
-		sendstdin(fd,id,H->post);
-		makeendrequest(fd,id,FCGI_STDIN);
+	{	sendparme(fd,id,a,H->uri);
+		sendparme(fd,id,c,d);
+		if(strlen(H->getdata)!=0)
+			sendparme(fd,id,e,H->getdata);
+		makeendrequest(fd,id,FCGI_PARAMS);
+		//std::cout<<3<<std::endl;
 	}
 	else 
-		return;
-}
+	{
+		if(strstr(H->method,"POST"))
+		{
+			sendparme(fd,id,params[0],H->uri);
+			sendparme(fd,id,params[6],H->content_type);
+			sendparme(fd,id,params[1],params[4]);
+			sendparme(fd,id,params[5],H->content_length);	
+			makeendrequest(fd,id,FCGI_PARAMS);	
+			sendstdin(fd,id,H->post);
+			makeendrequest(fd,id,FCGI_STDIN);
+		}
+		else 
+			return;
+	}
 	char context[1000];
 	int n=read(fd,&header,sizeof(header));
 	printf("类型 %d\n",header.type);
@@ -255,12 +255,12 @@ else
 	{
 		if(header.type==6)
 		{
-		int conlen=(header.contentLengthB1>>8)+header.contentLengthB0;
-		printf("获取内容的长度 %d\n",conlen);
-		int m=read(fd,context,1000);
-		context[m]='\0';
-		printf("%s\n",context);
-		printf_html(context,htmltext);
+			int conlen=(header.contentLengthB1>>8)+header.contentLengthB0;
+			printf("获取内容的长度 %d\n",conlen);
+			int m=read(fd,context,1000);
+			context[m]='\0';
+			printf("%s\n",context);
+			printf_html(context,htmltext);
 		}
 		else 
 		{
