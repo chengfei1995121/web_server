@@ -41,12 +41,14 @@ Parse::Parse(int n):fd(n){
 int Parse::handle_request()
 {
 	struct stat sbuf;
-	//no_block();
-	if(!read_n(fd,hd))
+	int n=read_n(fd,hd);
+	if(!n)
 	{
 		free(hd);
 		return 1;
 	}
+	if(n==1)
+	{
 	getfileuri();//获取文件路
 	cout<<"uri:"<<uri<<endl;
 	cout<<"fd"<<fd<<endl;
@@ -77,8 +79,7 @@ int Parse::handle_request()
 			respond_static_html();
 		}
 	}
-	//	free(hd);
-	Close();
+	}
 	return 0;
 }
 //响应静态内容

@@ -72,11 +72,12 @@ void Epoll::epoll_listen(const Socket &Sk)
 					confd=events[i].data.fd;
 					Parse P(confd);
 					if(!P.handle_request())
-						//pool_add(middle,confd);
+					//pool_add(middle,confd);
 					{
 						event.data.fd=confd;
 						event.events=EPOLLOUT;
 						epoll_ctl(efd,EPOLL_CTL_DEL,confd,&event);
+						P.Close();
 					}
 				}
 
@@ -94,4 +95,5 @@ void middle(int fd)
 {
 	Parse P(fd);
 	P.handle_request();	
+	P.Close();
 }

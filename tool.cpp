@@ -13,25 +13,34 @@ int read_n(int fd,char *hd)
 		{
 			nread+=l;
 		}
-		else if(l==0)
+		else 
 		{
-			break;
-		}
-		else if(l==-1&&errno==EINTR)
-		{
-			continue;
-		}
-		else
-			if(l==-1&&errno==EAGAIN&&nread==0)
-				return 0;
-			else 
+			if(l==0)
+			{
+				cout<<"已经读完"<<endl;
 				break;
+			}
+			else
+			{
+				if(l==-1&&errno==EINTR)
+				{
+					continue;
+				}
+				else
+					if(l==-1&&errno==EAGAIN&&nread==0)
+						return 0;
+					else 
+						break;
+			}
+		}
 	}
 	hd[nread]='\0';
 	//	cout<<"头部"<<hd<<endl;
 	//	cout<<"大小"<<nread;
-	if(nread>=0)
+	if(nread>0)
 		return 1;
+	else 
+		return 2;
 }
 void write_n(int fd,char *context,int size)
 {
