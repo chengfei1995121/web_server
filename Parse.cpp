@@ -7,7 +7,7 @@
 #include "Parse.h"
 #include "tool.h"
 #define MAXSIZE 100000
-#define ONEMAX 1024*1024
+#define ONEMAX 10*1024
 using namespace std;
 
 
@@ -64,7 +64,6 @@ int Parse::handle_request()
 	if(stat(uri,&sbuf)<0)	
 	{
 		clienterror(fd);
-		Close();
 		return 0;
 	}	
 	if(strstr(uri,".php"))

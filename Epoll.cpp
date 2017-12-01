@@ -70,7 +70,7 @@ void Epoll::epoll_listen(const Socket &Sk)
 				if((events[i].events&EPOLLIN)&&events[i].data.fd>0)
 				{
 					confd=events[i].data.fd;
-					//Parse P(confd);
+					///Parse P(confd);
 					//if(!P.handle_request())
 					pool_add(middle,confd,efd);
 					/*{
