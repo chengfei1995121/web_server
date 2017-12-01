@@ -13,7 +13,7 @@ void pool_init(int m)
 	for(int i=0;i<m;i++)
 		pthread_create(&(pool->threadid[i]),NULL,thread_process,NULL);
 }
-int pool_add(void (*func) (int m),int n)
+int pool_add(void (*func) (int m,int efd),int n,int efd)
 {
 	Thread_task *new_task=(Thread_task *)malloc(sizeof(Thread_task));
 	if(new_task==NULL)
@@ -23,6 +23,7 @@ int pool_add(void (*func) (int m),int n)
 	}
 	new_task->func=func;
 	new_task->fd=n;
+	new_task->efd=efd;
 	new_task->next=NULL;
 	pthread_mutex_lock(&(pool->queue_lock));
 	Thread_task *mumber=pool->queue_head;
@@ -58,7 +59,7 @@ void *thread_process(void *arg)
 		}
 		pool->queue_head=worker->next;
 		pthread_mutex_unlock(&(pool->queue_lock));
-		(*worker->func)(worker->fd);
+		(*worker->func)(worker->fd,worker->efd);
 		free(worker);
 	}
 	return NULL;

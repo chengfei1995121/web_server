@@ -113,7 +113,7 @@ int Parse::no_block()
 int Parse::getfileuri()
 {
 	memset(uri,0,sizeof(uri));
-	strcat(uri,"./test");
+	strcat(uri,"./test/web-page");
 	int k=strlen(uri);
 	for (size_t i = 0; i < strlen(hd); i++)
 	{

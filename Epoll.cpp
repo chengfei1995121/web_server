@@ -70,15 +70,15 @@ void Epoll::epoll_listen(const Socket &Sk)
 				if((events[i].events&EPOLLIN)&&events[i].data.fd>0)
 				{
 					confd=events[i].data.fd;
-					Parse P(confd);
-					if(!P.handle_request())
-					//pool_add(middle,confd);
-					{
+					//Parse P(confd);
+					//if(!P.handle_request())
+					pool_add(middle,confd,efd);
+					/*{
 						event.data.fd=confd;
 						event.events=EPOLLOUT;
 						epoll_ctl(efd,EPOLL_CTL_DEL,confd,&event);
 						P.Close();
-					}
+					}*/
 				}
 
 			}
@@ -91,9 +91,15 @@ void Epoll::epoll_close()
 	delete []events;
 	close(efd);
 }
-void middle(int fd)
+void middle(int fd,int efd)
 {
+	struct epoll_event event;
 	Parse P(fd);
-	P.handle_request();	
-	P.Close();
+	if(!P.handle_request())
+	{
+		event.data.fd=fd;
+		event.events=EPOLLOUT;
+		epoll_ctl(efd,EPOLL_CTL_DEL,fd,&event);
+		P.Close();
+	}			
 }

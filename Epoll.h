@@ -17,5 +17,5 @@ class Epoll{
 		struct epoll_event *events;
 };
 int no_block(int fd);
-void middle(int);
+void middle(int,int);
 #endif

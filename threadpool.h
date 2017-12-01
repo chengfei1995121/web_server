@@ -4,8 +4,9 @@
 #include<pthread.h>
 #include"Parse.h"
 typedef struct task{
-	void (*func)(int n);
+	void (*func)(int n,int efd);
 	int fd;
+	int efd;
 	struct task *next;
 }Thread_task;
 typedef struct pool{
@@ -17,6 +18,6 @@ typedef struct pool{
 		int cur_queue_size;
 }Thread_pool;
 void pool_init(int m);
-int pool_add(void (*func) (int),int n);
+int pool_add(void (*func) (int,int),int n,int efd);
 void *thread_process(void *arg);
 #endif

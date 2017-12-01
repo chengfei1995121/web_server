@@ -174,14 +174,14 @@ void add_pool(int confd,struct cf *pool)
 */
 int main()
 {
-/*	struct sigaction sa;
+	struct sigaction sa;
     memset(&sa, '\0', sizeof(sa));
     sa.sa_handler = SIG_IGN;
     sa.sa_flags = 0;
     if (sigaction(SIGPIPE, &sa, NULL)) {
         cout<<"install sigal handler for SIGPIPE failed"<<endl;
-	}*/
-	pool_init(4);
+	}
+	pool_init(10);
 	Socket first("127.0.0.1",8888);
 	if(first.Socket_open()<0)
 	{
