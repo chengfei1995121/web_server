@@ -50,8 +50,8 @@ int Parse::handle_request()
 	if(n==1)
 	{
 	getfileuri();//获取文件路
-	cout<<"uri:"<<uri<<endl;
-	cout<<"fd"<<fd<<endl;
+	//cout<<"uri:"<<uri<<endl;
+	//cout<<"fd"<<fd<<endl;
 	get_request_method();
 	get_type();
 	if(strstr(method,"POST"))

@@ -54,7 +54,7 @@ void *thread_process(void *arg)
 		Thread_task *worker=pool->queue_head;
 		if(worker==NULL)
 		{
-			cout<<"empty"<<endl;
+			cout<<" task empty"<<endl;
 			exit(-1);
 		}
 		pool->queue_head=worker->next;

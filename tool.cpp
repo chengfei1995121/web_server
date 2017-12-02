@@ -1,5 +1,7 @@
 #include "http.h"
 #include<errno.h>
+#include<sys/epoll.h>
+#include "Parse.h"
 #define ONEMAX 10000
 using namespace std;
 
@@ -17,7 +19,6 @@ int read_n(int fd,char *hd)
 		{
 			if(l==0)
 			{
-				cout<<"已经读完"<<endl;
 				break;
 			}
 			else
@@ -54,8 +55,15 @@ void write_n(int fd,char *context,int size)
 				continue;
 			else
 			{
-				cout<<"respond write faile"<<endl;
+				if(errno==EAGAIN)
+				{
+					cout<<"EAGIN"<<endl;
+					continue;
+				}
+				else
+				{
 				break;
+				}
 			}
 		}
 		nwrite+=w;
@@ -69,4 +77,17 @@ int set_nonblocking(int fd)
 	if(flags==-1)
 		flags=0;
 	return fcntl(fd,F_SETFL,flags | O_NONBLOCK);
+}
+
+void middle(int fd,int efd)
+{
+	struct epoll_event event;
+	Parse P(fd);
+	if(!P.handle_request())
+	{
+		event.data.fd=fd;
+		event.events=EPOLLOUT;
+		epoll_ctl(efd,EPOLL_CTL_DEL,fd,&event);
+		P.Close();
+	}			
 }
